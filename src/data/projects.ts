@@ -1,0 +1,82 @@
+import type { Category, Project, ScenePreset } from "@/types";
+
+const img = (slug: string) => [1, 2, 3].map((i) => `/images/projects/${slug}-${i}.jpg`);
+
+const preset = (p: Partial<ScenePreset> & Pick<ScenePreset, "layout" | "wall" | "floor">): ScenePreset => ({
+  accent: "bronze",
+  textile: "boucle",
+  light: "natural",
+  cam: { pos: [1.2, 1.55, 9.2], look: [0, 1.05, -3] },
+  ...p,
+});
+
+export const CATEGORIES: Category[] = [
+  { id: "residential", label: "Residential", blurb: "Family homes planned around daily life, light and quiet.", image: "/images/projects/quiet-gallery-1.jpg" },
+  { id: "luxury-apartments", label: "Luxury Apartments", blurb: "Compact, high-finish interiors with generous proportions.", image: "/images/projects/walnut-room-1.jpg" },
+  { id: "private-villas", label: "Private Villas", blurb: "Houses and pavilions that open to their landscape.", image: "/images/projects/sand-pavilion-1.jpg" },
+  { id: "hospitality", label: "Hospitality", blurb: "Suites and public rooms with a calm, memorable atmosphere.", image: "/images/projects/lumen-suite-1.jpg" },
+  { id: "commercial", label: "Commercial", blurb: "Workplaces of stone, timber and daylight.", image: "/images/projects/atrium-office-1.jpg" },
+  { id: "bespoke-interiors", label: "Bespoke Interiors", blurb: "One-off furniture and joinery designed with the room.", image: "/images/projects/bronze-table-1.jpg" },
+];
+
+export const PROJECTS: Project[] = [
+  { slug: "quiet-gallery", title: "The Quiet Gallery", category: "residential", type: "Family residence", location: "Concept — location not specified", area: "320 m² (concept brief)",
+    summary: "A split-level home organised around one long fluted travertine wall.",
+    concept: "A single stone wall guides movement and anchors every room, so the rest of the house can stay quiet. Furniture is sculptural and sparse, leaving the wall and the daylight to do the talking.",
+    spatial: "The plan stretches along the wall: entry, living and dining sit in one enfilade, with the glass facade pulling light across the depth of the room.",
+    details: ["Fluted travertine feature wall", "Curved boucle sofa as the room's centrepiece", "Bronze accents limited to edges and table bases"],
+    materials: ["travertine", "walnut", "boucle", "bronze"],
+    preset: preset({ layout: "gallery", wall: "travertine", floor: "walnut" }), images: img("quiet-gallery") },
+  { slug: "walnut-room", title: "The Walnut Room", category: "luxury-apartments", type: "Apartment library-lounge", location: "Concept — location not specified", area: "185 m² (concept brief)",
+    summary: "A library-lounge wrapped in book-matched walnut.",
+    concept: "A warm, enclosed room that feels like the inside of an instrument: low light, deep timber, a few bronze reflections and soft seating.",
+    spatial: "Shelving runs the full wall and doubles as acoustic absorption; seating is gathered in a loose circle around a low stone table.",
+    details: ["Book-matched walnut wall and shelving", "Low, warm lighting layers", "Boucle seating around a stone table"],
+    materials: ["walnut", "bronze", "boucle", "linen"],
+    preset: preset({ layout: "library", wall: "walnut", floor: "oak", light: "warm", cam: { pos: [1.4, 1.5, 8.8], look: [0, 1.1, -3] } }), images: img("walnut-room") },
+  { slug: "sand-pavilion", title: "Sand Pavilion", category: "private-villas", type: "Garden pavilion", location: "Concept — location not specified", area: "210 m² (concept brief)",
+    summary: "A garden pavilion that opens fully to the landscape.",
+    concept: "Interior and garden share one floor and one horizon. Glass on two sides removes the idea of a front and back, leaving a room that belongs to the light.",
+    spatial: "A single open volume with a service core at one end; furniture floats in the middle so that views can run through.",
+    details: ["Two fully glazed facades", "Oak floor continuing to the terrace", "Linen and velvet seating in sand tones"],
+    materials: ["oak", "linen", "stone", "glass"],
+    preset: preset({ layout: "pavilion", wall: "plaster", floor: "oak", textile: "linen", cam: { pos: [-1.5, 1.6, 9.5], look: [0.5, 1.0, -2.5] } }), images: img("sand-pavilion") },
+  { slug: "lumen-suite", title: "Lumen Suite", category: "hospitality", type: "Hotel suite", location: "Concept — location not specified", area: "90 m² (concept brief)",
+    summary: "A hotel suite shaped by a curved plaster vault and indirect light.",
+    concept: "Indirect light washes a soft plaster vault so that the room glows without visible fittings. The bed sits on a low platform beneath it like an altar of linen.",
+    spatial: "Sleeping, bathing and lounging flow into each other beneath one ceiling gesture, avoiding corridors and doors where possible.",
+    details: ["Hand-trowelled plaster vault", "Concealed warm cove lighting", "Boucle bench and bronze lamp"],
+    materials: ["plaster", "boucle", "bronze", "oak"],
+    preset: preset({ layout: "suite", wall: "plaster", floor: "oak", light: "warm", cam: { pos: [0.8, 1.45, 8.6], look: [0, 1.0, -3] } }), images: img("lumen-suite") },
+  { slug: "atrium-office", title: "Atrium Office", category: "commercial", type: "Workplace", location: "Concept — location not specified", area: "640 m² (concept brief)",
+    summary: "A workplace of stone and oak around a planted central court.",
+    concept: "A calm courtyard at the centre of the floor plate brings daylight to every desk and gives the workplace a place to gather.",
+    spatial: "Workspaces ring the court; a long communal table forms the spine, with quiet rooms tucked behind reeded glass.",
+    details: ["Long oak communal table", "Pendant lights in brushed bronze", "Reeded glass partitions for privacy and light"],
+    materials: ["stone", "oak", "glass", "bronze"],
+    preset: preset({ layout: "office", wall: "stone", floor: "oak", cam: { pos: [3.2, 1.7, 9.8], look: [0, 1.0, -3] } }), images: img("atrium-office") },
+  { slug: "bronze-table", title: "Bronze Table Study", category: "bespoke-interiors", type: "Bespoke furniture", location: "Studio collection (concept)", area: "Edition concept",
+    summary: "A dining table with a cast-bronze base and a heavy stone top.",
+    concept: "A weighty top that seems to float on a sculptural bronze pedestal: mass and lightness held in one object.",
+    spatial: "Designed for a dining room with a single pendant above; the base is set back so chairs can tuck in freely.",
+    details: ["Honed travertine top", "Lathed bronze base", "Chairs in oak and boucle"],
+    materials: ["travertine", "bronze", "oak", "boucle"],
+    preset: preset({ layout: "dining", wall: "plaster", floor: "walnut", light: "warm", cam: { pos: [2.2, 1.6, 6.2], look: [0, 0.7, -1] } }), images: img("bronze-table") },
+  { slug: "stone-court-residence", title: "Stone Court Residence", category: "private-villas", type: "Courtyard house", location: "Concept — location not specified", area: "480 m² (concept brief)",
+    summary: "A house organised around a stone courtyard and a single tree.",
+    concept: "Rooms turn inward to a quiet court of natural stone, so that the heart of the house is open to the sky but sheltered from the street.",
+    spatial: "Living spaces open onto the court on three sides; a covered gallery links them and doubles as a place to sit.",
+    details: ["Natural stone paving", "Travertine walls", "Planted court and bench in timber"],
+    materials: ["stone", "travertine", "oak", "linen"],
+    preset: preset({ layout: "court", wall: "travertine", floor: "stone", textile: "linen", cam: { pos: [-2, 1.7, 10], look: [0, 1.1, -3] } }), images: img("stone-court-residence") },
+  { slug: "penthouse-nocturne", title: "Penthouse Nocturne", category: "luxury-apartments", type: "Penthouse", location: "Concept — location not specified", area: "260 m² (concept brief)",
+    summary: "A penthouse living room designed for the hour after sunset.",
+    concept: "Marble, bronze and low light turn the skyline into a backdrop. The room is calibrated for evening: warm pools of light, deep shadows, glowing glass.",
+    spatial: "Living and dining share one long room facing the glass; a single sculptural sofa divides them without a wall.",
+    details: ["Veined marble wall", "Dusk lighting scheme", "Bronze and boucle furniture"],
+    materials: ["marble", "bronze", "boucle", "walnut"],
+    preset: preset({ layout: "nocturne", wall: "marble", floor: "walnut", light: "dusk", cam: { pos: [1, 1.5, 9], look: [0, 1.05, -3] } }), images: img("penthouse-nocturne") },
+];
+
+export const PROJECT_BY_SLUG = Object.fromEntries(PROJECTS.map((p) => [p.slug, p]));
+export const CATEGORY_BY_ID = Object.fromEntries(CATEGORIES.map((c) => [c.id, c]));

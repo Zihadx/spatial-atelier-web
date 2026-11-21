@@ -1,0 +1,42 @@
+export interface Article {
+  slug: string;
+  topic: string;
+  title: string;
+  excerpt: string;
+  read: string;
+  image: string;
+  body: string[];
+  pull: string;
+}
+
+export const JOURNAL: Article[] = [
+  { slug: "afternoon-light-and-the-living-room", pull: "Design for the hour a room is actually lived in.", topic: "Lighting", title: "How afternoon light shapes a living room", read: "4 min", image: "/images/editorial/light.jpg",
+    excerpt: "Why the angle of the sun matters more than the number of lamps.",
+    body: ["A living room is rarely judged at noon. It is judged in the long, low light of late afternoon, when a wall of stone turns from pale to amber and shadows stretch across a floor.",
+      "Designing for that hour starts with orientation: where the glass sits, how deep the room is, and which surfaces will catch the light. Matte, textured materials such as travertine and plaster hold the glow; polished ones scatter it.",
+      "Artificial light should follow the same logic. Low, warm sources placed near seating echo the sun, while a single bright overhead light flattens the room."] },
+  { slug: "why-travertine-ages-well", pull: "A surface that is already varied forgives the marks of living.", topic: "Material Studies", title: "Why travertine ages well", read: "3 min", image: "/images/editorial/travertine.jpg",
+    excerpt: "A stone whose imperfections are the point.",
+    body: ["Travertine forms in layers, and its pores and bands are part of the beauty. Because the surface is already varied, small marks settle into it rather than disrupt it.",
+      "Honed and sealed, it suits floors and walls; fluted, it adds shadow and rhythm to a plain surface. Both treatments reward simple companions: oak, linen, a little bronze."] },
+  { slug: "the-sculptural-sofa", pull: "The silhouette becomes the room’s primary sculpture.", topic: "Furniture", title: "The sculptural sofa and the room around it", read: "5 min", image: "/images/editorial/sofa.jpg",
+    excerpt: "A curved form changes how people gather, and how a room reads.",
+    body: ["A curved sofa softens a rectangular room and invites conversation rather than screen-watching. Its silhouette becomes the room's primary sculpture.",
+      "Upholstery matters as much as shape. A looped boucle diffuses light and adds tactile depth; a smooth velvet reflects it. Choosing between them is choosing how the form will photograph, and how it will feel at the end of a long day."] },
+  { slug: "designing-with-timber", pull: "Good joinery hides its logic and keeps its grain.", topic: "Craftsmanship", title: "Designing with timber: oil, grain and patience", read: "4 min", image: "/images/editorial/timber.jpg",
+    excerpt: "Joinery that gets better every year.",
+    body: ["Timber is chosen for how it will age. Oiled walnut darkens and deepens, oak softens to a silver-honey, and both keep an open grain that welcomes touch.",
+      "Good joinery hides its logic: continuous grain across doors, shadow gaps instead of trims, hardware reduced to a bronze edge."] },
+  { slug: "a-room-in-three-dimensions", pull: "Use models to test proportion, samples to test touch.", topic: "Spatial Design", title: "A room in three dimensions before it exists", read: "4 min", image: "/images/editorial/spatial.jpg",
+    excerpt: "What a walkable preview can and cannot tell you.",
+    body: ["A 3D model answers questions that plans cannot: how tall a wall feels, how deep a sofa sits, how light falls across a floor at four o'clock.",
+      "It cannot replace a physical sample. The best process uses both: models to test proportion, samples to test touch."] },
+  { slug: "reading-the-interior-trends", pull: "Keep what makes a room calmer; ignore the rest.", topic: "Interior Trends", title: "Reading interior trends without chasing them", read: "3 min", image: "/images/editorial/trends.jpg",
+    excerpt: "Warm minimalism, tactile surfaces and the return of craft.",
+    body: ["Recent interiors favour warmth over austerity: natural stone, plaster and timber in place of high-gloss white. The common thread is texture.",
+      "A trend is only useful when it solves a problem in your own home. Keep what makes a room calmer and easier to live in, and ignore the rest."] },
+  { slug: "living-in-architecture", pull: "Every object should have an obvious place.", topic: "Architectural Living", title: "Living in architecture, not just a house", read: "5 min", image: "/images/editorial/architecture.jpg",
+    excerpt: "When walls, windows and furniture are designed as one idea.",
+    body: ["An architectural interior has a spine: a stone wall, a long window, a single material that runs from floor to ceiling. Everything else is arranged in relation to it.",
+      "This clarity makes rooms easier to furnish and easier to live in, because every object has an obvious place."] },
+];
