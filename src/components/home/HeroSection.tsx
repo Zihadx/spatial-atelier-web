@@ -1,64 +1,111 @@
-"use client";
-import { useGSAP } from "@gsap/react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { gsap, prefersReducedMotion, registerGsap, sceneProgress, ScrollTrigger } from "@/lib/animations";
-import { HeroCanvas } from "@/components/three/scenes";
+import type { CSSProperties } from "react";
 import Button from "@/components/ui/Button";
 import RevealText from "@/components/ui/RevealText";
+import manifest from "@/data/hero-sequence.json";
+import { frameUrl, type SequenceSet } from "@/lib/image-sequence";
+import HeroMotion from "./hero/HeroMotion";
 
-/** The single signature 3D moment. A priority poster paints first; the live scene mounts when the browser is idle (and not on Save-Data). */
+const pick = (s: SequenceSet): SequenceSet => ({ count: s.count, width: s.width, height: s.height, pad: s.pad, dir: s.dir });
+const SETS = { lg: pick(manifest.sets.lg), sm: pick(manifest.sets.sm) };
+
+const POSTER_ALT =
+  "A sunlit living room: a curved ivory bouclé sofa, a sculptural bronze coffee table on a round charcoal rug, and a fluted walnut wall with a long linear fireplace, beside floor-to-ceiling windows.";
+
+/**
+ * Cinematic hero. The scroll-scrubbed footage is a progressive enhancement over a static, server-rendered poster:
+ * without JavaScript, with reduced motion, or if the frames fail, the poster and all copy remain fully usable.
+ * Static markup lives here (server); the canvas, scroll mapping and text choreography live in <HeroMotion />.
+ */
 export default function HeroSection() {
-  const root = useRef<HTMLElement>(null);
-  const copy = useRef<HTMLDivElement>(null);
-  const [live, setLive] = useState(false);
-
-  useEffect(() => {
-    const nav = navigator as Navigator & { connection?: { saveData?: boolean } };
-    if (nav.connection?.saveData || prefersReducedMotion()) return;
-    const go = () => setLive(true);
-    if ("requestIdleCallback" in window) { const id = window.requestIdleCallback(go, { timeout: 2500 }); return () => window.cancelIdleCallback(id); }
-    const t = setTimeout(go, 1500);
-    return () => clearTimeout(t);
-  }, []);
-
-  useGSAP(() => {
-    registerGsap();
-    if (prefersReducedMotion()) { sceneProgress.hero.current = 0.3; return; }
-    ScrollTrigger.create({ trigger: root.current, start: "top top", end: "bottom bottom", scrub: true, onUpdate: (s) => { sceneProgress.hero.current = s.progress; } });
-    gsap.to(copy.current, { opacity: 0, y: -70, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "24% top", scrub: true } });
-    gsap.to("[data-poster]", { scale: 1.12, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom bottom", scrub: true } });
-    const intro = gsap.timeline({ paused: true, delay: 0.4 });
-    gsap.set("[data-hero-in]", { autoAlpha: 0 });
-    intro.to("[data-hero-in]", { autoAlpha: 1, y: 0, startAt: { y: 24 }, duration: 1.1, stagger: 0.13, ease: "power3.out" });
-    const play = () => intro.play();
-    if (window.__avReady) play(); else document.addEventListener("av:ready", play, { once: true });
-    return () => document.removeEventListener("av:ready", play);
-  }, { scope: root });
-
   return (
-    <section ref={root} className="relative h-[250svh] bg-espresso [@media(prefers-reduced-motion:reduce)]:h-svh" aria-label="Introduction">
+    <section
+      id="hero"
+      aria-labelledby="hero-title"
+      data-seq="loading"
+      style={{ "--hp": 0 } as CSSProperties}
+      className="group/hero relative h-[360svh] bg-espresso md:h-[450svh] [@media(prefers-reduced-motion:reduce)]:!h-svh"
+    >
       <div className="sticky top-0 h-svh overflow-hidden">
-        <div data-poster className="absolute inset-0 will-change-transform"><Image src="/images/hero/living-room.jpg" alt="" fill priority sizes="100vw" className="object-cover" aria-hidden /></div>
-        {live && <div className="absolute inset-0"><HeroCanvas progress={sceneProgress.hero} /></div>}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-charcoal/80 via-charcoal/25 to-transparent" aria-hidden />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-charcoal/70 via-transparent to-transparent" aria-hidden />
-        <div ref={copy} className="container-x absolute inset-0 flex flex-col justify-end pb-[clamp(4rem,9vh,7rem)] text-ivory">
-          <p data-hero-in className="eyebrow mb-6 !text-sandstone">Atelier Verre — The Living Space</p>
-          <h1 className="display-xl max-w-[11ch] !text-[clamp(3rem,6.2vw,7rem)]" aria-label="Spaces that feel like home.">
-            <RevealText as="span" by="lines" waitForIntro className="block">Spaces That</RevealText>
-            <RevealText as="span" by="lines" waitForIntro delay={0.15} className="block"><em>Feel Like Home.</em></RevealText>
-          </h1>
-          <p data-hero-in className="lead mt-7 max-w-md text-sandstone">Thoughtful interiors. Timeless materials. Spaces shaped around the way you live.</p>
-          <div data-hero-in className="pointer-events-auto mt-9 flex flex-wrap gap-4">
+        <figure className="absolute inset-0 m-0">
+          <Image
+            src={frameUrl(SETS.lg, 0)}
+            alt={POSTER_ALT}
+            fill
+            priority
+            quality={72}
+            sizes="100vw"
+            className="hero-poster object-cover"
+          />
+          <HeroMotion sets={SETS} />
+          <figcaption className="pointer-events-none absolute bottom-[clamp(2rem,5svh,3.5rem)] right-[var(--gutter)] z-[2] hidden text-right text-ivory lg:block">
+            <span data-hero-in className="block">
+              <span className="eyebrow block !text-sandstone">Project 01 — The Hearth Room</span>
+              <span className="mt-2 block text-[0.72rem] tracking-[0.18em] text-sandstone/70 uppercase">Interior architecture &amp; design</span>
+            </span>
+          </figcaption>
+        </figure>
+
+        {/* localized contrast for type and the fixed navigation — never a flat overlay on the photography */}
+        <div className="hero-vignette pointer-events-none absolute inset-0 z-[1]" aria-hidden />
+        <div className="hero-scrim-nav pointer-events-none absolute inset-x-0 top-0 z-[1] h-[30%]" aria-hidden />
+        <div className="hero-scrim-top pointer-events-none absolute inset-0 z-[1] hidden md:block" aria-hidden />
+        <div data-scrim-start className="hero-scrim-start pointer-events-none absolute inset-0 z-[1]" aria-hidden />
+        <div className="hero-scrim-low pointer-events-none absolute inset-0 z-[1] md:hidden" aria-hidden />
+
+        {/* opening state: the headline sits on the dark walnut paneling, clear of the furniture and the hearth */}
+        <div data-start className="pointer-events-none absolute inset-0 z-[2]">
+          <div className="container-x flex h-full flex-col justify-between pb-[clamp(3rem,8svh,7rem)] pt-[clamp(6rem,15svh,8rem)] text-ivory md:pb-[clamp(2.5rem,7svh,5rem)]">
+            <div className="md:ml-auto md:text-right">
+              <p data-hero-in className="eyebrow mb-5 !text-sandstone md:mb-6">Atelier Verre — The Art of Living</p>
+              <h1 id="hero-title" className="display-xl max-w-[11ch] !text-[clamp(2.9rem,5.8vw,6.4rem)] md:ml-auto md:!text-[clamp(3.4rem,5.8vw,6.4rem)] [&_em]:!text-sandstone">
+                <RevealText as="span" by="lines" waitForIntro className="block">Spaces That</RevealText>
+                <RevealText as="span" by="lines" waitForIntro delay={0.15} className="block"><em>Feel Like Home.</em></RevealText>
+              </h1>
+            </div>
+            <div>
+              <p data-hero-in className="lead max-w-md text-sandstone">
+                Thoughtful interiors. Timeless materials.<br className="hidden sm:block" /> Spaces shaped around the way you live.
+              </p>
+              <div data-hero-in className="pointer-events-auto mt-7 flex flex-wrap gap-3 md:mt-8 md:gap-4">
+                <Button href="/projects">Explore Our Work</Button>
+                <Button href="/contact" variant="line">Begin a Conversation</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* mid-journey caption */}
+        <div data-mid className="pointer-events-none invisible absolute inset-0 z-[2] container-x flex flex-col justify-end pb-[clamp(4.5rem,12svh,8rem)] text-ivory md:items-end md:justify-start md:pb-0 md:pt-[15svh] md:text-right">
+          <p className="eyebrow mb-4 !text-sandstone">01 — Material</p>
+          <p className="display-s max-w-[15ch] md:max-w-[20ch] [&_em]:!text-sandstone">Walnut, stone and bronze, <em>held in warm light.</em></p>
+        </div>
+
+        {/* closing state — the only place the calls to action return */}
+        <div data-end className="pointer-events-none invisible absolute inset-0 z-[2] container-x flex flex-col justify-end pb-[clamp(3.5rem,9svh,7rem)] text-ivory md:items-end md:justify-start md:pb-0 md:pt-[15svh] md:text-right">
+          <p className="eyebrow mb-4 !text-sandstone">Atelier Verre</p>
+          <p className="display-m max-w-[14ch] !text-[clamp(2rem,3.6vw,4rem)] md:max-w-[18ch] [&_em]:!text-sandstone">Every room, <em>composed with care.</em></p>
+          <div className="pointer-events-auto mt-6 flex flex-wrap gap-3 md:justify-end md:gap-4">
             <Button href="/projects">Explore Our Work</Button>
             <Button href="/contact" variant="line">Begin a Conversation</Button>
           </div>
         </div>
-        <div data-hero-in className="absolute bottom-8 right-[var(--gutter)] hidden flex-col items-center gap-4 text-ivory md:flex" aria-hidden>
-          <span className="eyebrow !text-sandstone [writing-mode:vertical-rl]">Scroll to enter</span>
-          <span className="scroll-line" />
+
+        {/* scroll indicator + progress rail (desktop: vertical on the right edge; mobile: hairline along the bottom) */}
+        <div data-hero-in className="pointer-events-none absolute bottom-[clamp(7rem,19svh,11rem)] right-[var(--gutter)] z-[2] hidden flex-col items-center gap-4 text-ivory group-data-[seq=error]/hero:hidden group-data-[seq=static]/hero:hidden md:flex" aria-hidden>
+          <span data-hint className="eyebrow !text-sandstone [writing-mode:vertical-rl]">
+            <span className="group-data-[seq=loading]/hero:hidden">Scroll</span>
+            <span className="hidden animate-pulse group-data-[seq=loading]/hero:inline">Loading</span>
+          </span>
+          <span className="relative block h-24 w-px bg-ivory/25">
+            <span className="absolute inset-0 origin-top bg-bronze [transform:scaleY(var(--hp))]" />
+          </span>
         </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-px bg-ivory/15 group-data-[seq=error]/hero:hidden group-data-[seq=static]/hero:hidden md:hidden" aria-hidden>
+          <span className="block h-full origin-left bg-bronze [transform:scaleX(var(--hp))]" />
+        </div>
+
+        <p data-seq-live role="status" aria-live="polite" className="sr-only" />
       </div>
     </section>
   );

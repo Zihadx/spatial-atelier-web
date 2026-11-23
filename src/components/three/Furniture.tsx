@@ -68,26 +68,29 @@ export function CoffeeTable({ position = [0, 0, 0], top = "travertine" as Materi
 }
 
 export function Rug({ position = [0, 0, 0], radius = 2.6, material = "linen" as MaterialId, tint = "#F5F1E9", rect }: P & { radius?: number; material?: MaterialId; tint?: string; rect?: [number, number] }) {
+  // a rug has thickness: the visible edge and the soft contact shadow it throws are what seat it on the floor
   return (
-    <mesh position={[position[0], 0.012, position[2]]} rotation-x={-Math.PI / 2} receiveShadow>
-      {rect ? <planeGeometry args={rect} /> : <circleGeometry args={[radius, 72]} />}
+    <mesh position={[position[0], 0.014, position[2]]} castShadow receiveShadow>
+      {rect ? <boxGeometry args={[rect[0], 0.026, rect[1]]} /> : <cylinderGeometry args={[radius, radius, 0.026, 96]} />}
       <Surface id={material} repeat={[5, 5]} tint={tint} roughness={1} normalScale={0.8} />
     </mesh>
   );
 }
-
 export function FloorLamp({ position = [0, 0, 0], glow = 0.3, color = "#FFD9A0" }: P & { glow?: number; color?: string }) {
-  const shade = glow > 0.5 ? color : "#EDE1CC";
   return (
     <group position={position}>
       <mesh position={[0, 0.02, 0]} castShadow><cylinderGeometry args={[0.22, 0.26, 0.04, 40]} /><Surface id="bronze" /></mesh>
       <mesh position={[0, 0.98, 0]} castShadow><cylinderGeometry args={[0.014, 0.014, 1.9, 12]} /><Surface id="bronze" roughness={0.3} metalness={1} /></mesh>
-      <mesh position={[0, 2.05, 0]}><sphereGeometry args={[0.3, 32, 24]} /><meshBasicMaterial color={shade} toneMapped={false} /></mesh>
-      <pointLight position={[0, 2, 0]} color={color} intensity={glow * 7} distance={9} decay={2} />
+      {/* linen drum shade: lit from inside, so it glows softly rather than reading as a flat disc */}
+      <mesh position={[0, 1.98, 0]} castShadow={false}>
+        <cylinderGeometry args={[0.2, 0.31, 0.4, 56, 1, true]} />
+        <meshStandardMaterial color="#EFE4D0" emissive={color} emissiveIntensity={0.12 + glow * 0.75} roughness={0.95} side={THREE.DoubleSide} />
+      </mesh>
+      <mesh position={[0, 1.95, 0]}><sphereGeometry args={[0.06, 16, 12]} /><meshBasicMaterial color={color} toneMapped={false} /></mesh>
+      <pointLight position={[0, 1.95, 0]} color={color} intensity={glow * 7} distance={9} decay={2} />
     </group>
   );
 }
-
 export function Pendant({ position = [0, 3.4, 0], drop = 1.2, glow = 0.5, color = "#FFD9A0", radius = 0.32 }: P & { drop?: number; glow?: number; color?: string; radius?: number }) {
   return (
     <group position={position}>
@@ -121,15 +124,37 @@ export function Sideboard({ position = [0, 0, 0], width = 3.6, material = "walnu
   );
 }
 
-export function Art({ position = [0, 1.7, -5.8], size = [1.6, 2.1] as [number, number], material = "plaster" as MaterialId }: { position?: Vec3; size?: [number, number]; material?: MaterialId }) {
+function useArtTexture(ratio: number) {
+  const tex = useMemo(() => {
+    const W = 512, H = Math.round(512 / ratio);
+    const c = document.createElement("canvas"); c.width = W; c.height = H;
+    const x = c.getContext("2d")!;
+    const r = rng(7);
+    x.fillStyle = "#E7DCC8"; x.fillRect(0, 0, W, H);
+    // quiet colour-field composition in the studio palette
+    x.fillStyle = "#C79F77"; x.beginPath(); x.arc(W * 0.36, H * 0.6, W * 0.27, 0, Math.PI * 2); x.fill();
+    x.fillStyle = "#3C2C21"; x.beginPath(); x.arc(W * 0.62, H * 0.34, W * 0.19, Math.PI, 0); x.fill();
+    x.fillStyle = "#A7B09B"; x.fillRect(W * 0.58, H * 0.34, W * 0.3, H * 0.015);
+    x.strokeStyle = "#8B6A45"; x.lineWidth = 3; x.beginPath(); x.moveTo(W * 0.1, H * 0.84); x.lineTo(W * 0.9, H * 0.84); x.stroke();
+    // canvas tooth
+    for (let i = 0; i < 9000; i++) { x.fillStyle = `rgba(${r() > 0.5 ? "255,250,240" : "60,44,33"},${0.025 + r() * 0.05})`; x.fillRect(r() * W, r() * H, 1 + r() * 2, 1); }
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    return t;
+  }, [ratio]);
+  useLayoutEffect(() => () => tex.dispose(), [tex]);
+  return tex;
+}
+
+export function Art({ position = [0, 1.7, -5.8], size = [1.6, 2.1] as [number, number] }: { position?: Vec3; size?: [number, number]; material?: MaterialId }) {
+  const tex = useArtTexture(size[0] / size[1]);
   return (
     <group position={position}>
       <mesh castShadow><boxGeometry args={[size[0] + 0.08, size[1] + 0.08, 0.05]} /><Surface id="bronze" /></mesh>
-      <mesh position={[0, 0, 0.03]}><planeGeometry args={size} /><Surface id={material} repeat={[1, 1.3]} tint="#E6D9C3" normalScale={1.6} /></mesh>
+      <mesh position={[0, 0, 0.03]}><planeGeometry args={size} /><meshStandardMaterial map={tex} roughness={0.9} /></mesh>
     </group>
   );
 }
-
 export function Chair({ position, look, height = 0.84, tint = "#D9CBB8" }: { position: Vec3; look: Vec3; height?: number; tint?: string }) {
   return <Model url={MODELS.chair} height={height} position={position} rotationY={faceTo(position, look)} tint={tint} />;
 }

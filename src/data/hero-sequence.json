@@ -1,0 +1,25 @@
+{
+  "source": {
+    "frames": 179,
+    "width": 1920,
+    "height": 1080
+  },
+  "sets": {
+    "lg": {
+      "count": 179,
+      "width": 1920,
+      "height": 1080,
+      "pad": 4,
+      "dir": "/hero/sequence/lg",
+      "bytes": 13893464
+    },
+    "sm": {
+      "count": 90,
+      "width": 1280,
+      "height": 720,
+      "pad": 4,
+      "dir": "/hero/sequence/sm",
+      "bytes": 4088488
+    }
+  }
+}

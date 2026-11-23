@@ -7,16 +7,16 @@ import type { MaterialId } from "@/types";
 
 export type Repeat = [number, number];
 
-export function useSurfaceMaps(id: MaterialId, rx: number, ry: number) {
+export function useSurfaceMaps(id: MaterialId, rx: number, ry: number, floor = false) {
   const info = MATERIAL_BY_ID[id];
-  const [albedo, normal] = useTexture([info.albedo, info.normal]);
+  const [albedo, normal] = useTexture(floor && info.floorAlbedo && info.floorNormal ? [info.floorAlbedo, info.floorNormal] : [info.albedo, info.normal]);
   const maps = useMemo(() => {
     const a = albedo.clone();
     const n = normal.clone();
     for (const t of [a, n]) {
       t.wrapS = t.wrapT = THREE.RepeatWrapping;
       t.repeat.set(rx, ry);
-      t.anisotropy = 8;
+      t.anisotropy = 16;
       t.needsUpdate = true;
     }
     a.colorSpace = THREE.SRGBColorSpace;

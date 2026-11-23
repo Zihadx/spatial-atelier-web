@@ -12,6 +12,9 @@ export interface MaterialInfo {
   albedo: string;
   normal: string;
   plate: string;
+  /** plank/tile variant used when the material is a floor */
+  floorAlbedo?: string;
+  floorNormal?: string;
   roughness: number;
   metalness: number;
   repeat: number;
@@ -36,11 +39,11 @@ export const MATERIALS: MaterialInfo[] = [
   { id: "walnut", name: "Walnut", family: "Timber", short: "Deep, dense, richly figured timber.",
     detail: "Walnut brings depth to a room without needing ornament. Oiled rather than lacquered, it keeps its open grain and deepens with light and use.",
     character: ["Deep", "Fine-grained", "Oiled"], use: ["Flooring", "Joinery", "Wall panelling"],
-    care: "Hard-wax oil, refreshed every few years.", roughness: 0.5, metalness: 0, repeat: 1, tint: "#60432F", ...t("wood", "walnut") },
+    care: "Hard-wax oil, refreshed every few years.", roughness: 0.5, metalness: 0, repeat: 1, tint: "#60432F", ...t("wood", "walnut"), floorAlbedo: "/textures/wood/walnut_floor_albedo.jpg", floorNormal: "/textures/wood/walnut_floor_normal.jpg" },
   { id: "oak", name: "Oak", family: "Timber", short: "Light, quiet, endlessly adaptable.",
     detail: "Oak is the neutral that never feels neutral: a straight, honest grain that holds a room together. Limed or smoked, it moves easily from warm to cool.",
     character: ["Light", "Straight-grained", "Versatile"], use: ["Floors", "Cabinetry", "Furniture"],
-    care: "Oil or matt lacquer; wipe with a damp cloth.", roughness: 0.55, metalness: 0, repeat: 1, tint: "#D9CBB8", ...t("wood", "oak") },
+    care: "Oil or matt lacquer; wipe with a damp cloth.", roughness: 0.55, metalness: 0, repeat: 1, tint: "#D9CBB8", ...t("wood", "oak"), floorAlbedo: "/textures/wood/oak_floor_albedo.jpg", floorNormal: "/textures/wood/oak_floor_normal.jpg" },
   { id: "bronze", name: "Brushed Bronze", family: "Metal", short: "Hand-finished metal that ages with grace.",
     detail: "Brushed bronze catches light in long, soft streaks. It is used sparingly — as an edge, a leg, a handle — so that the warmth of the metal reads as punctuation.",
     character: ["Warm", "Brushed", "Patinating"], use: ["Furniture legs", "Inlays", "Hardware"],

@@ -67,8 +67,10 @@ function shaftTexture() {
 }
 
 function Floor({ id, reflective }: { id: MaterialId; reflective: boolean }) {
-  const rx = id === "stone" ? 3 : 3.2, ry = id === "stone" ? 5 : 5;
-  const { a, n, info } = useSurfaceMaps(id, rx, ry);
+  const timber = id === "oak" || id === "walnut";
+  // timber floors: one texture tile = 16 boards (about 0.2 m each), so the repeat is sized in metres
+  const rx = timber ? 12.2 / 3.6 : id === "stone" ? 3 : 3.2, ry = timber ? D / 3.2 : 5;
+  const { a, n, info } = useSurfaceMaps(id, rx, ry, true);
   const q = useQuality();
   const useRefl = reflective && q === "high";
   return (
@@ -76,12 +78,12 @@ function Floor({ id, reflective }: { id: MaterialId; reflective: boolean }) {
       <planeGeometry args={[12.2, D]} />
       {useRefl ? (
         <MeshReflectorMaterial
-          map={a} normalMap={n} normalScale={new THREE.Vector2(0.5, 0.5)} color="#d8d0c4"
+          map={a} normalMap={n} normalScale={new THREE.Vector2(0.5, 0.5)} color={id === "oak" ? "#c4b498" : "#d8d0c4"}
           resolution={512} blur={[260, 80]} mixBlur={1} mixStrength={0.55} mirror={0}
           roughness={0.55} metalness={0} depthScale={0.4} minDepthThreshold={0.5} maxDepthThreshold={1.6}
         />
       ) : (
-        <meshStandardMaterial map={a} normalMap={n} normalScale={new THREE.Vector2(0.5, 0.5)} roughness={info.roughness * 0.8} />
+        <meshStandardMaterial map={a} normalMap={n} normalScale={new THREE.Vector2(0.5, 0.5)} color={id === "oak" ? "#cbbb9d" : "#ffffff"} roughness={info.roughness * 0.8} />
       )}
     </mesh>
   );
@@ -157,7 +159,7 @@ export default function RoomShell({ wall, floor, mode, glass = "right", fluted =
         <mesh position={[ROOM.x0, H / 2, ZC]} receiveShadow castShadow><boxGeometry args={[0.2, H, D]} /><Surface id={sw} repeat={[5, 1.6]} /></mesh>
       )}
       {/* ceiling */}
-      <mesh position={[0, H + 0.1, ZC]} receiveShadow><boxGeometry args={[12.2, 0.2, D]} /><meshStandardMaterial color="#F5F1E9" emissive="#EADFCB" emissiveIntensity={rig.ceil} roughness={1} /></mesh>
+      <mesh position={[0, H + 0.1, ZC]} receiveShadow><boxGeometry args={[12.2, 0.2, D]} /><meshStandardMaterial color="#F0E6D5" emissive="#E6D5B8" emissiveIntensity={rig.ceil} roughness={1} /></mesh>
       <Vault ceiling={vault} />
       {/* right glass wall */}
       {rightGlass && <GlassWall x={ROOM.x1} mullions={mullions} />}
