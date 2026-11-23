@@ -7,19 +7,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
+import { discoverFrames } from "./lib/sequence-tools.mjs";
 
 const src = process.argv[2];
 if (!src || !fs.existsSync(src)) { console.error("usage: node scripts/build-hero-sequence.mjs <source-dir>"); process.exit(1); }
 
-const found = fs.readdirSync(src)
-  .map((f) => { const m = f.match(/^(.*?)(\d+)\.(png|jpe?g|webp)$/i); return m ? { f, n: +m[2], pad: m[2].length } : null; })
-  .filter(Boolean)
-  .sort((a, b) => a.n - b.n);
-if (!found.length) { console.error("no numbered image frames found"); process.exit(1); }
-
-const first = found[0].n, last = found.at(-1).n;
-const gaps = [];
-for (let n = first; n <= last; n++) if (!found.some((x) => x.n === n)) gaps.push(n);
+let found, first, last, gaps;
+try { ({ found, first, last, gaps } = discoverFrames(src)); } catch (e) { console.error(e.message); process.exit(1); }
 if (gaps.length) console.warn(`warning: ${gaps.length} missing frame number(s): ${gaps.slice(0, 12).join(", ")} — the sequence is packed, so playback stays continuous`);
 
 const meta = await sharp(path.join(src, found[0].f)).metadata();

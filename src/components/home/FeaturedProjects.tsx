@@ -16,13 +16,28 @@ const FEATURED = SLUGS.map((s) => PROJECT_BY_SLUG[s]);
 /**
  * Pinned horizontal gallery (desktop): vertical scroll drives a single transform on the track, each photo drifts
  * against it (containerAnimation parallax), and a progress rule + counter update without re-rendering React.
- * On touch / small / reduced-motion screens it becomes a plain vertical list.
+ * Below lg (phones, tablets) and with reduced motion it is a native horizontal scroll-snap rail instead: touch swipe,
+ * adjacent cards peeking in from the edge, and the same counter + progress rule, driven by the rail's own scrollLeft.
  */
 export default function FeaturedProjects({ index = "02" }: { index?: string }) {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLUListElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
   const count = useRef<HTMLSpanElement>(null);
+  const raf = useRef(0);
+
+  /** Mobile/tablet rail: reflect scroll position in the counter + hairline (DOM writes only, no React state). */
+  const onRail = () => {
+    const t = track.current;
+    if (!t || raf.current || window.matchMedia("(min-width: 1024px) and (prefers-reduced-motion: no-preference)").matches) return;
+    raf.current = requestAnimationFrame(() => {
+      raf.current = 0;
+      const max = t.scrollWidth - t.clientWidth;
+      const p = max > 0 ? Math.min(1, Math.max(0, t.scrollLeft / max)) : 0;
+      if (bar.current) bar.current.style.transform = `scaleX(${0.14 + 0.86 * p})`;
+      if (count.current) count.current.textContent = String(Math.min(FEATURED.length, Math.round(p * (FEATURED.length - 1)) + 1)).padStart(2, "0");
+    });
+  };
 
   useGSAP(() => {
     registerGsap();
@@ -55,18 +70,23 @@ export default function FeaturedProjects({ index = "02" }: { index?: string }) {
             <SectionLabel index={index} label="Selected work — concept projects" />
             <h2 id="featured-title" className="display-l">Five rooms, <em>five stories.</em></h2>
           </div>
-          <div className="hidden items-center gap-5 lg:flex" aria-hidden>
+          <div className="flex items-center gap-4 sm:gap-5" aria-hidden>
             <span className="num text-xl"><span ref={count}>01</span> / {String(FEATURED.length).padStart(2, "0")}</span>
-            <span className="relative block h-px w-40 bg-espresso/20"><span ref={bar} className="absolute inset-0 origin-left scale-x-0 bg-bronze" /></span>
+            <span className="relative block h-px w-24 bg-espresso/20 sm:w-40"><span ref={bar} className="absolute inset-0 origin-left scale-x-[0.14] bg-bronze lg:scale-x-0" /></span>
           </div>
         </div>
       </div>
-      <ul ref={track} className="mt-10 flex w-full flex-col gap-10 px-[var(--gutter)] pb-[var(--section-y)] lg:mt-12 lg:w-max lg:flex-row lg:gap-[3vw] lg:pb-0">
+      <ul
+        ref={track}
+        onScroll={onRail}
+        aria-label="Selected concept projects — swipe sideways to browse"
+        className="mt-8 flex w-full snap-x snap-mandatory scroll-px-[var(--gutter)] gap-4 overflow-x-auto overscroll-x-contain px-[var(--gutter)] pb-[var(--section-y)] [scrollbar-width:none] sm:gap-6 lg:mt-12 lg:w-max lg:snap-none lg:gap-[3vw] lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden [@media(prefers-reduced-motion:reduce)]:lg:!w-full [@media(prefers-reduced-motion:reduce)]:lg:!overflow-x-auto"
+      >
         {FEATURED.map((p, i) => (
-          <li key={p.slug} data-pan className="lg:w-[min(52vw,42rem)] lg:shrink-0">
+          <li key={p.slug} data-pan className="w-[76vw] max-w-[26rem] shrink-0 snap-start sm:w-[56vw] lg:w-[min(52vw,42rem)] lg:max-w-none">
             <Link href={`/projects/${p.slug}`} data-cursor="View" className="group block">
               <div className="frame frame-landscape bg-espresso lg:h-[min(52svh,29rem)] lg:w-full lg:!aspect-auto">
-                <div data-pimg className="absolute inset-y-0 -inset-x-[9%]"><Photo photo={PROJECT_PHOTO[p.slug]} sizes="(min-width: 1024px) 52vw, 100vw" priority={i === 0} /></div>
+                <div data-pimg className="absolute inset-y-0 -inset-x-[9%]"><Photo photo={PROJECT_PHOTO[p.slug]} sizes="(min-width: 1024px) 52vw, (min-width: 640px) 56vw, 76vw" priority={i === 0} /></div>
                 <span className="absolute left-4 top-4 bg-ivory/90 px-3 py-1.5 text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-espresso">Concept</span>
               </div>
               <div className="mt-5 flex items-start justify-between gap-6">
@@ -79,7 +99,7 @@ export default function FeaturedProjects({ index = "02" }: { index?: string }) {
             </Link>
           </li>
         ))}
-        <li className="flex items-center lg:w-[18rem] lg:shrink-0"><Button href="/projects" variant="dark">View all projects</Button></li>
+        <li className="flex shrink-0 snap-start items-center pr-[var(--gutter)] lg:w-[18rem] lg:pr-0"><Button href="/projects" variant="dark">View all projects</Button></li>
       </ul>
     </section>
   );

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { coverRect, FrameStore, panRange, type SequenceSet, type SequenceStatus } from "@/lib/image-sequence";
+import { coverRect, FrameStore, panRange, progressToFrame, type SequenceSet, type SequenceStatus } from "@/lib/image-sequence";
 
 interface Props {
   sets: { lg: SequenceSet; sm: SequenceSet };
@@ -9,6 +9,10 @@ interface Props {
   /** hands the owner a function that wakes the render loop when progress changes */
   onWake: (wake: () => void) => void;
   onStatus: (status: SequenceStatus, keyFraction: number, setKey: "lg" | "sm") => void;
+  /** horizontal focal range when the box crops the footage sideways (defaults to the hero's viewport-aspect rule) */
+  pan?: (viewportAspect: number) => { from: number; to: number };
+  /** vertical focal position when the box crops the footage vertically */
+  focalY?: number;
 }
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -20,7 +24,7 @@ type Nav = Navigator & { connection?: { saveData?: boolean }; deviceMemory?: num
  * Renders the frame sequence to a <canvas>. The loop only runs while something is changing (scroll easing, a new
  * frame arriving, a resize) and goes fully idle otherwise, so a still hero costs nothing.
  */
-export default function ImageSequenceCanvas({ sets, getProgress, onWake, onStatus }: Props) {
+export default function ImageSequenceCanvas({ sets, getProgress, onWake, onStatus, pan: panFn = panRange, focalY = 0.55 }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -42,7 +46,7 @@ export default function ImageSequenceCanvas({ sets, getProgress, onWake, onStatu
 
     let store: FrameStore | null = null;
     let cssW = 0, cssH = 0, scale = 1;
-    let pan: { from: number; to: number } = panRange(window.innerWidth / window.innerHeight);
+    let pan: { from: number; to: number } = panFn(window.innerWidth / window.innerHeight);
     let shown = 0;
     let raf = 0, last = 0, dirty = true, lastKey = "";
     let disposed = false;
@@ -70,7 +74,7 @@ export default function ImageSequenceCanvas({ sets, getProgress, onWake, onStatu
       const w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
       if (w === cssW && h === cssH) return;
       cssW = w; cssH = h;
-      pan = panRange(window.innerWidth / window.innerHeight);
+      pan = panFn(window.innerWidth / window.innerHeight);
       const dpr = Math.min(window.devicePixelRatio || 1, maxDpr, Math.sqrt(MAX_PIXELS / (w * h)));
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
@@ -87,7 +91,7 @@ export default function ImageSequenceCanvas({ sets, getProgress, onWake, onStatu
       const a = Math.floor(target);
       const f = target - a;
       const px = lerp(pan.from, pan.to, ease(Math.max(0, Math.min(1, target / (set.count - 1)))));
-      const py = 0.55;
+      const py = focalY;
       const base = store.nearest(f > 0.5 ? a + 1 : a);
       if (!base) return;
       const bitmap = base.frame;
@@ -111,7 +115,7 @@ export default function ImageSequenceCanvas({ sets, getProgress, onWake, onStatu
       raf = 0;
       const dt = last ? Math.min(0.05, (t - last) / 1000) : 1 / 60;
       last = t;
-      const target = Math.max(0, Math.min(1, getProgress())) * (set.count - 1);
+      const target = progressToFrame(set, getProgress());
       const diff = target - shown;
       shown = Math.abs(diff) < 0.004 ? target : shown + diff * (1 - Math.exp(-dt * 12));
       store?.focus(Math.round(shown));

@@ -13,6 +13,8 @@ export interface SequenceSet {
   height: number;
   pad: number;
   dir: string;
+  /** optional cumulative motion curve (0→1, one value per frame): maps scroll to *visible* progress */
+  curve?: number[];
 }
 
 export type SequenceStatus = "loading" | "ready" | "error";
@@ -27,6 +29,19 @@ export const frameUrl = (set: SequenceSet, index: number) => `${set.dir}/f-${Str
  */
 const PAN = { landscape: { from: 0.3, to: 0.7 }, portrait: { from: 0.62, to: 0.95 } } as const;
 export const panRange = (viewportAspect: number) => (viewportAspect >= 1.2 ? PAN.landscape : PAN.portrait);
+
+/** Scroll progress (0–1) → fractional frame index, honouring the set's motion-equalizing curve when it has one. */
+export function progressToFrame(set: SequenceSet, progress: number): number {
+  const p = Math.max(0, Math.min(1, progress));
+  const last = set.count - 1;
+  const c = set.curve;
+  if (!c || c.length !== set.count) return p * last;
+  let lo = 0, hi = last;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (c[mid] < p) lo = mid + 1; else hi = mid; }
+  if (lo === 0) return 0;
+  const a = c[lo - 1], b = c[lo];
+  return lo - 1 + (b > a ? (p - a) / (b - a) : 1);
+}
 
 /** Equivalent of CSS `object-fit: cover` with an object-position of (px, py), expressed as a canvas draw rectangle. */
 export function coverRect(cw: number, ch: number, iw: number, ih: number, px: number, py: number) {

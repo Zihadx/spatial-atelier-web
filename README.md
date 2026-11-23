@@ -35,6 +35,17 @@ The hero is a scroll-scrubbed camera move through a living room, rendered from a
 - **Pacing:** section height is `450svh` (desktop) / `360svh` (mobile); the sticky stage is pinned while a single scrubbed timeline drives the text states and progress rail.
 - The old WebGL `HeroCanvas` (`components/three/canvases.tsx`) is no longer mounted; it can be deleted.
 
+## Design Process (3D scroll stage)
+`components/home/DesignProcess.tsx` pins the section and scrubs a frame sequence of a luxury home assembling from seven floating platforms; `components/home/process/ProcessStage.tsx` is the canvas panel. It reuses the hero's engine (`lib/image-sequence.ts`, `hero/ImageSequenceCanvas.tsx`).
+- **Assets:** `node scripts/build-process-sequence.mjs <folder> [--grade=sand|none]` → `public/process/sequence/{lg,sm}` (1600 px / 1000 px WebP) + `src/data/process-sequence.json`. The supplied render had a saturated pink backdrop; `--grade=sand` (default) shifts only low-saturation pinks toward warm sand (timber, planting, glass and lighting are untouched). Use `--grade=none` for the original colours.
+- **Time curve:** the footage eases in/out, so the manifest stores a cumulative motion curve and scroll maps to *visible* progress (`progressToFrame`), keeping all seven stages equally eventful. Stage notes in `DesignProcess.tsx` (`STAGE_NOTES`) describe what the model shows in each stage; if you swap the footage, re-read the "stage boundaries" line the build prints and update them.
+- **Loading:** the canvas mounts only within two viewports of the section (IntersectionObserver) and releases its frames when far away; the poster is served directly so it never waits on the image optimizer.
+- **Overlays:** the "Brief reference" inset (`/images/architecture/spatial.jpg`) shows in stage 01; six callouts fade in on the finished home (positions are fractions of the footage's own 16:9 framing, so they are hidden below `sm` where the panel is cropped to 4:3).
+- **Reduced motion / failure:** no canvas; each stage shows its own still.
+
+## Selected Work rail
+`FeaturedProjects.tsx`: ≥1024 px keeps the pinned horizontal GSAP gallery. Below that it is a native scroll-snap rail (`snap-x`, cards `76vw` so the next one peeks), with the counter and hairline driven from `scrollLeft` (DOM writes only).
+
 ## Material realism pass (Nov 2026)
 - Timber floors use dedicated **plank textures** (`walnut_floor`, `oak_floor`: ~0.2 m boards, per-board tone, staggered end joints, grooved seams, seamless tiling). Furniture timber uses a separate tight-grain texture. Travertine has horizontal strata and elongated voids. All regenerate with `node scripts/generate-textures.mjs [name]`.
 - Props: lit drum lamp shades, rugs with thickness, painted abstract wall art (canvas texture, disposed on unmount).
