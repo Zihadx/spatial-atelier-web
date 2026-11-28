@@ -8,7 +8,7 @@ import { PROJECT_BY_SLUG } from "@/data/projects";
 import Furnishings from "./Furnishings";
 import Lighting from "./Lighting";
 import RoomShell from "./RoomShell";
-import { LIGHT } from "./lighting";
+import { LIGHT } from "./lighting.config";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export type Focus = "space" | "light" | "form" | "material" | "texture" | "proportion";

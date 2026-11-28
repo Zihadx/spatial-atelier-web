@@ -6,7 +6,7 @@ import CameraRig from "./CameraController";
 import Furnishings from "./Furnishings";
 import Lighting from "./Lighting";
 import RoomShell, { type ShellProps } from "./RoomShell";
-import { LIGHT } from "./lighting";
+import { LIGHT } from "./lighting.config";
 import { variantCam } from "@/lib/camera";
 
 export function shellFor(layout: Layout): Pick<ShellProps, "glass" | "fluted" | "vault" | "reflective"> {

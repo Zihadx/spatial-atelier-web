@@ -3,7 +3,7 @@ import { MeshReflectorMaterial, Sparkles } from "@react-three/drei";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { LightMode, MaterialId } from "@/types";
-import { LIGHT } from "./lighting";
+import { LIGHT } from "./lighting.config";
 import { useQuality } from "./quality";
 import { Surface, useSurfaceMaps } from "./Surface";
 

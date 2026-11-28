@@ -6,8 +6,9 @@ import {
   Planter, ReededPartition, Rug, Shelving, Sideboard, LatheBase,
 } from "./Furniture";
 import Model, { MODELS } from "./Model";
-import { LIGHT } from "./lighting";
+
 import { Surface } from "./Surface";
+import { LIGHT } from "./lighting.config";
 
 interface Props { layout: Layout; mode: LightMode; textile: MaterialId; floor?: MaterialId }
 

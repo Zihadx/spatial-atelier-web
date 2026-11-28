@@ -1,7 +1,7 @@
 "use client";
 import { Environment, Lightformer } from "@react-three/drei";
 import type { LightMode } from "@/types";
-import { LIGHT } from "./lighting";
+import { LIGHT } from "./lighting.config";
 import { useQuality } from "./quality";
 
 /** Sun, sky/ground fill and a procedural studio environment built from lightformers (no remote HDRIs). */
