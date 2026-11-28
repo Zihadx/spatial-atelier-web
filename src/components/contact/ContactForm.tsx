@@ -1,11 +1,10 @@
 "use client";
+import "@/lib/zod-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ArrowRight } from "lucide-react";
-import { CATEGORIES } from "@/data/projects";
-import { SITE } from "@/lib/constants";
 
 const schema = z.object({
   name: z.string().min(2, "Please enter your name"),
@@ -18,21 +17,22 @@ const schema = z.object({
 });
 type Values = z.infer<typeof schema>;
 
-const BUDGETS = ["Prefer to discuss", "Placeholder range A", "Placeholder range B", "Placeholder range C"];
 type Status = { kind: "idle" } | { kind: "sent" } | { kind: "unconfigured" } | { kind: "error"; msg: string };
 
-/** Validated inquiry form posting to /api/contact (honeypot, rate limit, optional Resend delivery). */
-export default function ContactForm({ dark = false }: { dark?: boolean }) {
+interface Props { dark?: boolean; projectTypes: string[]; budgetRanges: { value: string; label: string }[]; fallbackEmail: string }
+
+/** Validated inquiry form posting to /api/contact (contract: API_CONTRACTS.md). Options and fallback email come from config via props. */
+export default function ContactForm({ dark = false, projectTypes, budgetRanges, fallbackEmail }: Props) {
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { type: CATEGORIES[0].label, budget: BUDGETS[0] },
+    defaultValues: { type: projectTypes[0], budget: budgetRanges[0].label },
   });
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const onSubmit = async (v: Values) => {
     setStatus({ kind: "idle" });
     try {
       const res = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...v, kind: "inquiry" }) });
-      const j = (await res.json()) as { ok: boolean; delivered?: boolean; error?: string };
+      const j = (await res.json()) as { ok: boolean; delivered?: boolean; error?: string; code?: string };
       if (!res.ok || !j.ok) { setStatus({ kind: "error", msg: j.error ?? "Something went wrong. Please try again." }); return; }
       setStatus({ kind: j.delivered ? "sent" : "unconfigured" });
       reset();
@@ -45,8 +45,8 @@ export default function ContactForm({ dark = false }: { dark?: boolean }) {
       <div className="grid gap-x-10 gap-y-8 md:grid-cols-2">
         <div className="field"><label htmlFor="name">Name</label><input id="name" autoComplete="name" {...common("name")} />{err("name")}</div>
         <div className="field"><label htmlFor="email">Email</label><input id="email" type="email" autoComplete="email" {...common("email")} />{err("email")}</div>
-        <div className="field"><label htmlFor="type">Project type</label><select id="type" {...common("type")}>{CATEGORIES.map((c) => <option key={c.id}>{c.label}</option>)}</select>{err("type")}</div>
-        <div className="field"><label htmlFor="budget">Budget range</label><select id="budget" {...common("budget")}>{BUDGETS.map((b) => <option key={b}>{b}</option>)}</select>{err("budget")}</div>
+        <div className="field"><label htmlFor="type">Project type</label><select id="type" {...common("type")}>{projectTypes.map((t) => <option key={t}>{t}</option>)}</select>{err("type")}</div>
+        <div className="field"><label htmlFor="budget">Budget range</label><select id="budget" {...common("budget")}>{budgetRanges.map((b) => <option key={b.value} value={b.label}>{b.label}</option>)}</select>{err("budget")}</div>
         <div className="field md:col-span-2"><label htmlFor="location">Project location</label><input id="location" autoComplete="address-level2" {...common("location")} />{err("location")}</div>
         <div className="field md:col-span-2"><label htmlFor="message">About the space</label><textarea id="message" rows={4} {...common("message")} />{err("message")}</div>
         <div aria-hidden className="absolute left-[-9999px] h-0 w-0 overflow-hidden"><label htmlFor="company">Company</label><input id="company" tabIndex={-1} autoComplete="off" {...register("company")} /></div>
@@ -55,7 +55,7 @@ export default function ContactForm({ dark = false }: { dark?: boolean }) {
         <button type="submit" disabled={isSubmitting} className={`btn ${dark ? "btn-solid" : "btn-dark"} disabled:opacity-60`}>{isSubmitting ? "Sending…" : "Request a consultation"} <ArrowRight size={16} aria-hidden /></button>
         <p role="status" className="max-w-sm text-sm text-muted">
           {status.kind === "sent" && "Thank you — your message is with the studio. We will reply by email."}
-          {status.kind === "unconfigured" && <>Email delivery is not set up on this site yet. Please write to <a className="underline" href={`mailto:${SITE.email}`}>{SITE.email}</a>.</>}
+          {status.kind === "unconfigured" && <>We could not deliver your message automatically. Please write to <a className="underline" href={`mailto:${fallbackEmail}`}>{fallbackEmail}</a>.</>}
           {status.kind === "error" && status.msg}
           {status.kind === "idle" && "We reply to every inquiry personally."}
         </p>

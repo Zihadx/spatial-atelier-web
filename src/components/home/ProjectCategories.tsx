@@ -6,17 +6,17 @@ import { ArrowUpRight } from "lucide-react";
 import Photo from "@/components/ui/Photo";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { CATEGORY_PHOTO } from "@/data/photos";
-import { CATEGORIES, PROJECTS } from "@/data/projects";
+import type { Category, Project } from "@/content";
 import { gsap, isCoarsePointer, prefersReducedMotion, registerGsap } from "@/lib/animations";
 
 /** Large typographic index. On fine pointers a photograph follows the cursor and crossfades per row; on touch each row shows a thumbnail. */
-export default function ProjectCategories({ index = "03" }: { index?: string }) {
+export default function ProjectCategories({ index = "03", categories: CATEGORIES, projects: PROJECTS }: { index?: string; categories: Category[]; projects: Project[] }) {
   const root = useRef<HTMLElement>(null);
   const preview = useRef<HTMLDivElement>(null);
   useGSAP(() => {
     registerGsap();
     const pv = preview.current;
-    gsap.from("[data-row]", { y: 40, autoAlpha: 0, duration: 1, stagger: 0.08, ease: "power3.out", scrollTrigger: { trigger: root.current, start: "top 70%", once: true } });
+    gsap.from("[data-row]", { y: 40, opacity: 0, duration: 1, stagger: 0.08, ease: "power3.out", scrollTrigger: { trigger: root.current, start: "top 70%", once: true } });
     if (!pv || isCoarsePointer() || prefersReducedMotion()) return;
     const x = gsap.quickTo(pv, "x", { duration: 0.6, ease: "power3.out" });
     const y = gsap.quickTo(pv, "y", { duration: 0.6, ease: "power3.out" });
@@ -52,7 +52,7 @@ export default function ProjectCategories({ index = "03" }: { index?: string }) 
               return (
                 <li key={c.id} data-row className="relative overflow-hidden border-b border-ivory/20">
                   <span data-fill className="absolute inset-0 origin-bottom scale-y-0 bg-espresso" aria-hidden />
-                  <Link href={`/projects?category=${c.id}`} className="relative grid grid-cols-[3rem_1fr_auto] items-center gap-4 py-6 md:grid-cols-[5rem_1fr_16rem_3rem] md:py-8" aria-label={`${c.label}: ${n} concept project${n > 1 ? "s" : ""}`}>
+                  <Link href={`/projects?category=${c.id}`} className="relative grid grid-cols-[3rem_1fr_auto] items-center gap-4 py-6 md:grid-cols-[5rem_1fr_16rem_3rem] md:py-8">
                     <span className="num text-sm text-taupe">{String(i + 1).padStart(2, "0")}</span>
                     <span data-name className="display-m">{c.label}</span>
                     <span className="hidden text-sm text-taupe md:block">{c.blurb}</span>

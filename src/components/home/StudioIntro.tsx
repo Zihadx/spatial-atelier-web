@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getBrand } from "@/lib/site";
 import CountUp from "@/components/ui/CountUp";
 import ImageReveal from "@/components/ui/ImageReveal";
 import Marquee from "@/components/ui/Marquee";
@@ -19,7 +20,7 @@ export default function StudioIntro({ index = "01" }: { index?: string }) {
           <div className="lg:col-span-7">
             <RevealText as="h2" by="words" className="display-l"><span id="intro-title">An Art of Living, <em>Defined by Space.</em></span></RevealText>
             <div className="mt-12 grid gap-8 md:grid-cols-2">
-              <Reveal><p className="lead">Atelier Verre designs interiors the way an architect designs a house: from light, proportion and material outwards, until every room feels inevitable.</p></Reveal>
+              <Reveal><p className="lead">{getBrand().name} designs interiors the way an architect designs a house: from light, proportion and material outwards, until every room feels inevitable.</p></Reveal>
               <Reveal delay={0.12}>
                 <p className="text-muted">Stone, timber, bronze and soft weave are chosen for how they age and how they feel under the hand.</p>
                 <Link href="/studio" className="link-u mt-7">About the studio</Link>

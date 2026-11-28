@@ -25,8 +25,5 @@ export function isCoarsePointer() {
 }
 
 /** Shared mutable scroll progress for 3D scenes (read inside useFrame, never triggers React renders). */
-export const sceneProgress = {
-  hero: { current: 0 },
-};
 
 export { gsap, ScrollTrigger, SplitText, Flip, DrawSVGPlugin };

@@ -1,13 +1,4 @@
-export interface Article {
-  slug: string;
-  topic: string;
-  title: string;
-  excerpt: string;
-  read: string;
-  image: string;
-  body: string[];
-  pull: string;
-}
+import type { Article } from "../types";
 
 export const JOURNAL: Article[] = [
   { slug: "afternoon-light-and-the-living-room", pull: "Design for the hour a room is actually lived in.", topic: "Lighting", title: "How afternoon light shapes a living room", read: "4 min", image: "/images/editorial/light.jpg",

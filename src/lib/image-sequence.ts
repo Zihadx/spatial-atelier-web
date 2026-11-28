@@ -13,6 +13,8 @@ export interface SequenceSet {
   height: number;
   pad: number;
   dir: string;
+  /** content hash of the frames; appended as ?v= so URLs can be cached as immutable */
+  version?: string;
   /** optional cumulative motion curve (0→1, one value per frame): maps scroll to *visible* progress */
   curve?: number[];
 }
@@ -20,7 +22,9 @@ export interface SequenceSet {
 export type SequenceStatus = "loading" | "ready" | "error";
 export type DecodedFrame = ImageBitmap | HTMLImageElement;
 
-export const frameUrl = (set: SequenceSet, index: number) => `${set.dir}/f-${String(index + 1).padStart(set.pad, "0")}.webp`;
+/** `versioned: false` returns the bare path — required for next/image, which rejects query strings on local images. */
+export const frameUrl = (set: SequenceSet, index: number, { versioned = true }: { versioned?: boolean } = {}) =>
+  `${set.dir}/f-${String(index + 1).padStart(set.pad, "0")}.webp${versioned && set.version ? `?v=${set.version}` : ""}`;
 
 /**
  * Horizontal focal position (CSS object-position semantics) used when the viewport crops the footage sideways.

@@ -32,7 +32,8 @@ export default function RevealText({ children, as: Tag = "div", className, by = 
         type: by,
         mask: by,
         autoSplit: true,
-        aria: "auto",
+        // aria-label is only valid on elements with a role (headings); on generic spans/divs the text stays readable as-is
+        aria: /^h[1-6]$/.test(Tag) ? "auto" : "none",
         onSplit(self) {
           gsap.set(el, { opacity: 1 });
           const targets = by === "words" ? self.words : self.lines;

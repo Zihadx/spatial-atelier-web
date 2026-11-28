@@ -3,10 +3,12 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { NAV } from "@/data/navigation";
+import type { ChromeData } from "@/lib/chrome";
+import Wordmark from "@/components/ui/Wordmark";
 import { getLenis } from "@/lib/lenis";
 
-export default function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function MobileMenu({ open, onClose, brand, nav, contact }: { open: boolean; onClose: () => void; brand: ChromeData["brand"]; nav: ChromeData["nav"]; contact: ChromeData["contact"] }) {
+  const NAV = nav.main;
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -23,7 +25,7 @@ export default function MobileMenu({ open, onClose }: { open: boolean; onClose: 
         <motion.div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menu" className="fixed inset-0 z-[60] flex flex-col bg-espresso text-ivory"
           initial={{ clipPath: "inset(0 0 100% 0)" }} animate={{ clipPath: "inset(0 0 0% 0)" }} exit={{ clipPath: "inset(0 0 100% 0)" }} transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}>
           <div className="container-x flex items-center justify-between py-6">
-            <span className="font-display text-2xl">Atelier <em className="text-bronze">Verre</em></span>
+            <span className="font-display text-2xl"><Wordmark {...brand.wordmark} /></span>
             <button ref={closeRef} type="button" onClick={onClose} className="btn btn-line !py-3" aria-label="Close menu"><X size={16} /> Close</button>
           </div>
           <ul className="container-x mt-8 flex flex-1 flex-col justify-center gap-2">
@@ -33,7 +35,7 @@ export default function MobileMenu({ open, onClose }: { open: boolean; onClose: 
               </motion.li>
             ))}
           </ul>
-          <div className="container-x pb-8 text-sm text-taupe"><a href="mailto:studio@atelierverre.example" className="link-u text-ivory">studio@atelierverre.example</a><p className="mt-3">Atelier Verre — demonstration studio concept</p></div>
+          <div className="container-x pb-8 text-sm text-taupe"><a href={contact.emailHref} className="link-u text-ivory">{contact.email}</a><p className="mt-3"><a href={contact.phoneHref} className="link-u text-ivory">{contact.phoneDisplay}</a></p></div>
         </motion.div>
       )}
     </AnimatePresence>

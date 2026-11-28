@@ -6,7 +6,7 @@ import manifest from "@/data/process-sequence.json";
 import { frameUrl, progressToFrame, type SequenceSet, type SequenceStatus } from "@/lib/image-sequence";
 import { cn } from "@/lib/utils";
 
-const pick = (s: SequenceSet): SequenceSet => ({ count: s.count, width: s.width, height: s.height, pad: s.pad, dir: s.dir, curve: s.curve });
+const pick = (s: SequenceSet): SequenceSet => ({ count: s.count, width: s.width, height: s.height, pad: s.pad, dir: s.dir, version: s.version, curve: s.curve });
 export const PROCESS_SETS = { lg: pick(manifest.sets.lg as SequenceSet), sm: pick(manifest.sets.sm as SequenceSet) };
 
 /** Which source frame best represents the middle of each stage (used for the reduced-motion stills). */
@@ -90,7 +90,7 @@ export default function ProcessStage({ stage, stages, getProgress, onWake, onSta
         <span className="relative block aspect-[4/3] overflow-hidden border border-espresso/20 bg-sandstone shadow-[0_10px_30px_-12px_rgba(36,36,33,0.5)]">
           <Image src={REF.src} alt="" fill sizes="12vw" className="object-cover" />
         </span>
-        <figcaption className="mt-1.5 text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-espresso/70">Brief reference</figcaption>
+        <figcaption className="mt-1.5 text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-espresso/80">Brief reference</figcaption>
       </figure>
 
       {/* the finished home, annotated (desktop/tablet: positions are exact only at the footage's own 16:9 framing) */}

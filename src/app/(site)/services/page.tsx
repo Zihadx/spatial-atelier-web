@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import { getContent } from "@/content";
+import { buildMetadata } from "@/lib/seo";
 import ConsultationCTA from "@/components/home/ConsultationCTA";
 import ServiceShowcase from "@/components/services/ServiceShowcase";
 import Faq from "@/components/ui/Faq";
@@ -6,20 +7,17 @@ import PageHero from "@/components/ui/PageHero";
 import Engagement from "@/components/home/Engagement";
 import { PHOTO } from "@/data/photos";
 import Reveal from "@/components/ui/Reveal";
-import { FAQ, METHOD } from "@/data/services";
-import { PROCESS } from "@/data/studio";
 
-export const metadata: Metadata = {
-  title: "Services",
-  description: "Residential, villa and commercial interior design, space planning, furniture and styling, material selection and renovation consultation.",
-  alternates: { canonical: "/services" },
-};
+export const metadata = buildMetadata({ title: "Services", description: "Residential, villa and commercial interior design, space planning, furniture and styling, material selection and renovation consultation.", path: "/services" });
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const content = getContent();
+  const [services, METHOD, FAQ, studio] = await Promise.all([content.getServices(), content.getServiceMethod(), content.getFaq(), content.getStudio()]);
+  const PROCESS = studio.process;
   return (
     <>
       <PageHero eyebrow="Services" title={<>Everything a room <em>needs.</em></>} lead="Seven disciplines, delivered by one team, so that planning, materials and furniture are always working toward the same idea." photo={PHOTO.servicesHero} />
-      <ServiceShowcase />
+      <ServiceShowcase services={services} />
       <Engagement index="→" />
       <section className="section surface-dark" aria-labelledby="method">
         <div className="container-x">

@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Any valid https origin works for CI builds (env validation rejects example.* hosts and missing values).
+  NEXT_PUBLIC_SITE_URL: https://ci.atelier-verre.test
+
+jobs:
+  quality:
+    name: Types, lint, unit tests, audit, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      # Fails on high/critical advisories in shipped (production) dependencies.
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm run build
+
+  e2e:
+    name: End-to-end (Playwright, production build)
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 40
+    env:
+      # The e2e server runs on localhost, and the contact API only accepts its own origin.
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # scripts/e2e-server.mjs builds and starts the production server; Playwright waits for it.
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

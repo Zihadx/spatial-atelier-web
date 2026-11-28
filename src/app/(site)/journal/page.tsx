@@ -1,14 +1,16 @@
-import type { Metadata } from "next";
+import { getContent } from "@/content";
+import { buildMetadata } from "@/lib/seo";
+import { getBrand } from "@/lib/site";
 import Link from "next/link";
 import PageHero from "@/components/ui/PageHero";
 import Photo from "@/components/ui/Photo";
 import { JOURNAL_PHOTO, PHOTO } from "@/data/photos";
 import Reveal from "@/components/ui/Reveal";
-import { JOURNAL } from "@/data/journal";
 
-export const metadata: Metadata = { title: "Journal", description: "Design stories on light, material, furniture and spatial thinking from Atelier Verre.", alternates: { canonical: "/journal" } };
+export const metadata = buildMetadata({ title: "Journal", description: `Design stories on light, material, furniture and spatial thinking from ${getBrand().name}.`, path: "/journal" });
 
-export default function JournalPage() {
+export default async function JournalPage() {
+  const JOURNAL = await getContent().getArticles();
   return (
     <>
       <PageHero eyebrow="Journal" title={<>Notes on <em>living well.</em></>} lead="Short essays on architecture, light, furniture and craft." photo={PHOTO.journalHero} />

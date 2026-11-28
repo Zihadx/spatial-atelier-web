@@ -1,5 +1,10 @@
 import type { MetadataRoute } from "next";
+import { getBrand } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
-  return { name: "Atelier Verre — The Living Space", short_name: "Atelier Verre", description: "Luxury interior architecture and design.", start_url: "/", display: "standalone", background_color: "#F5F1E9", theme_color: "#332B24", icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }] };
+  const brand = getBrand();
+  return {
+    name: `${brand.name} — ${brand.tagline}`, short_name: brand.name, description: "Luxury interior architecture and design.", start_url: "/", display: "standalone",
+    background_color: brand.backgroundColor, theme_color: brand.themeColor, icons: [{ src: brand.logo.src, sizes: "any", type: "image/svg+xml", purpose: "any" }],
+  };
 }

@@ -28,7 +28,7 @@ function Group<T extends string>({ label, items, value, onChange }: { label: str
       <div className="flex flex-wrap gap-2">
         {items.map((i) => (
           <button key={i.id} type="button" aria-pressed={value === i.id} onClick={() => onChange(i.id)}
-            className={cn("rounded-full border px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] capitalize transition-colors duration-500", value === i.id ? "border-bronze bg-bronze text-warm-white" : "border-ivory/25 hover:border-bronze")}>
+            className={cn("rounded-full border px-4 py-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] capitalize transition-colors duration-500", value === i.id ? "border-bronze bg-bronze text-charcoal" : "border-ivory/25 hover:border-bronze")}>
             {i.label}
           </button>
         ))}

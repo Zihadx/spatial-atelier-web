@@ -1,13 +1,13 @@
 import type { MetadataRoute } from "next";
-import { JOURNAL } from "@/data/journal";
-import { PROJECTS } from "@/data/projects";
-import { SITE } from "@/lib/constants";
+import { getContent } from "@/content";
+import { absoluteUrl, getSite } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = ["", "/projects", "/services", "/studio", "/materials", "/journal", "/contact", "/privacy", "/terms"];
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const content = getContent();
+  const [projects, articles] = await Promise.all([content.getProjects(), content.getArticles()]);
   return [
-    ...pages.map((p) => ({ url: SITE.url + p, changeFrequency: "monthly" as const, priority: p === "" ? 1 : 0.8 })),
-    ...PROJECTS.map((p) => ({ url: `${SITE.url}/projects/${p.slug}`, priority: 0.7 })),
-    ...JOURNAL.map((a) => ({ url: `${SITE.url}/journal/${a.slug}`, priority: 0.5 })),
+    ...getSite().sitemapPages.map((p) => ({ url: absoluteUrl(p), changeFrequency: "monthly" as const, priority: p === "/" ? 1 : 0.8 })),
+    ...projects.map((p) => ({ url: absoluteUrl(`/projects/${p.slug}`), priority: 0.7 })),
+    ...articles.map((a) => ({ url: absoluteUrl(`/journal/${a.slug}`), priority: 0.5 })),
   ];
 }

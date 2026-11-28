@@ -5,11 +5,11 @@ import { useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import Photo from "@/components/ui/Photo";
 import { SERVICE_PHOTO } from "@/data/photos";
-import { SERVICES } from "@/data/services";
+import type { Service } from "@/content";
 import { gsap, prefersReducedMotion, registerGsap, ScrollTrigger } from "@/lib/animations";
 
 /** Left: sticky photo that wipes between services as each section crosses the viewport centre (ScrollTrigger). Right: the detail. */
-export default function ServiceShowcase() {
+export default function ServiceShowcase({ services: SERVICES }: { services: Service[] }) {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
   useGSAP(() => {

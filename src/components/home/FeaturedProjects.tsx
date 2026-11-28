@@ -7,11 +7,10 @@ import Photo from "@/components/ui/Photo";
 import SectionLabel from "@/components/ui/SectionLabel";
 import Button from "@/components/ui/Button";
 import { PROJECT_PHOTO } from "@/data/photos";
-import { CATEGORY_BY_ID, PROJECT_BY_SLUG } from "@/data/projects";
+import type { Category, Project } from "@/content";
 import { gsap, registerGsap } from "@/lib/animations";
 
 const SLUGS = ["quiet-gallery", "walnut-room", "sand-pavilion", "lumen-suite", "penthouse-nocturne"];
-const FEATURED = SLUGS.map((s) => PROJECT_BY_SLUG[s]);
 
 /**
  * Pinned horizontal gallery (desktop): vertical scroll drives a single transform on the track, each photo drifts
@@ -19,7 +18,9 @@ const FEATURED = SLUGS.map((s) => PROJECT_BY_SLUG[s]);
  * Below lg (phones, tablets) and with reduced motion it is a native horizontal scroll-snap rail instead: touch swipe,
  * adjacent cards peeking in from the edge, and the same counter + progress rule, driven by the rail's own scrollLeft.
  */
-export default function FeaturedProjects({ index = "02" }: { index?: string }) {
+export default function FeaturedProjects({ index = "02", projects, categories }: { index?: string; projects: Project[]; categories: Category[] }) {
+  const CATEGORY_BY_ID: Record<string, Category> = Object.fromEntries(categories.map((c) => [c.id, c]));
+  const FEATURED = SLUGS.map((s) => projects.find((p) => p.slug === s)).filter((p): p is Project => Boolean(p));
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLUListElement>(null);
   const bar = useRef<HTMLSpanElement>(null);

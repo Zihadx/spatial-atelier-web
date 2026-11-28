@@ -15,7 +15,10 @@ interface Props {
   as?: React.ElementType;
 }
 
-/** Scroll-triggered fade/translate reveal with consistent easing. */
+/**
+ * Scroll-triggered fade/translate reveal with consistent easing. Uses opacity only (never visibility): hidden content
+ * would drop out of the accessibility tree and the Tab order until scrolled into view.
+ */
 export default function Reveal({ children, className, y = 40, x = 0, delay = 0, stagger, as: Tag = "div" }: Props) {
   const ref = useRef<HTMLElement>(null);
   useGSAP(
@@ -26,8 +29,8 @@ export default function Reveal({ children, className, y = 40, x = 0, delay = 0, 
       if (prefersReducedMotion()) { gsap.set(el, { opacity: 1 }); return; }
       const targets = stagger ? Array.from(el.children) : el;
       gsap.set(el, { opacity: 1 });
-      gsap.fromTo(targets, { autoAlpha: 0, y, x }, {
-        autoAlpha: 1, y: 0, x: 0, duration: 1.2, delay, ease: "power3.out", stagger: stagger ?? 0,
+      gsap.fromTo(targets, { opacity: 0, y, x }, {
+        opacity: 1, y: 0, x: 0, duration: 1.2, delay, ease: "power3.out", stagger: stagger ?? 0,
         scrollTrigger: { trigger: el, start: "top 88%", once: true },
       });
     },

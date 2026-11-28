@@ -1,20 +1,20 @@
-import type { Metadata } from "next";
+import ContactDetails from "@/components/contact/ContactDetails";
+import { getContent } from "@/content";
+import { buildMetadata } from "@/lib/seo";
+import { getBrand, getContact } from "@/lib/site";
 import ContactForm from "@/components/contact/ContactForm";
 import Faq from "@/components/ui/Faq";
 import PageHero from "@/components/ui/PageHero";
 import { PHOTO } from "@/data/photos";
 import Reveal from "@/components/ui/Reveal";
 import Button from "@/components/ui/Button";
-import { FAQ } from "@/data/services";
-import { SITE } from "@/lib/constants";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: "Start a project with Atelier Verre: tell us about the space, budget and location.",
-  alternates: { canonical: "/contact" },
-};
+export const metadata = buildMetadata({ title: "Contact", description: `Start a project with ${getBrand().name}: tell us about the space, budget and location.`, path: "/contact" });
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const content = getContent();
+  const [categories, FAQ] = await Promise.all([content.getCategories(), content.getFaq()]);
+  const contact = getContact();
   return (
     <>
       <PageHero eyebrow="Contact" title={<>Begin a <em>conversation.</em></>} lead="Tell us about the space and how you want it to feel." photo={PHOTO.contactHero} />
@@ -22,14 +22,9 @@ export default function ContactPage() {
         <div className="container-x grid gap-16 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <h2 id="inq" className="display-m">Project <em>inquiry.</em></h2>
-            <Reveal className="mt-10 space-y-6 text-sm" delay={0.1}>
-              <div><p className="eyebrow mb-2">Email</p><a className="link-u" href={`mailto:${SITE.email}`}>{SITE.email}</a></div>
-              <div><p className="eyebrow mb-2">Phone</p><p>{SITE.phone}</p></div>
-              <div><p className="eyebrow mb-2">Studio location</p><p className="text-muted">{SITE.address}</p></div>
-            </Reveal>
-            <div className="mt-10 flex aspect-[4/3] items-center justify-center bg-sandstone text-center text-sm text-espresso/70" role="img" aria-label="Map placeholder"><span className="eyebrow">Map placeholder</span></div>
+            <Reveal className="mt-10" delay={0.1}><ContactDetails /></Reveal>
           </div>
-          <div className="lg:col-span-8"><ContactForm /></div>
+          <div className="lg:col-span-8"><ContactForm projectTypes={categories.map((c) => c.label)} budgetRanges={contact.form.budgetRanges} fallbackEmail={contact.emails.primary} /></div>
         </div>
       </section>
       <section className="section surface-sand" aria-labelledby="cfaq">

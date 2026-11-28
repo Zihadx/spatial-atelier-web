@@ -3,9 +3,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import SectionLabel from "@/components/ui/SectionLabel";
-import { TESTIMONIALS, TESTIMONIAL_NOTE } from "@/data/studio";
+import type { Testimonial } from "@/content";
 
-export default function Testimonials({ index = "11" }: { index?: string }) {
+export default function Testimonials({ index = "11", items: TESTIMONIALS }: { index?: string; items: Testimonial[] }) {
   const [i, setI] = useState(0);
   const n = TESTIMONIALS.length;
   const t = TESTIMONIALS[i];
@@ -13,7 +13,7 @@ export default function Testimonials({ index = "11" }: { index?: string }) {
   return (
     <section className="surface-sand" aria-label="Testimonials">
       <div className="container-x section">
-        <SectionLabel index={index} label="Kind words — sample content" />
+        <SectionLabel index={index} label="Kind words" />
         <div className="min-h-[13rem]" aria-live="polite">
           <AnimatePresence mode="wait">
             <motion.blockquote key={i} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -24 }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
@@ -27,7 +27,7 @@ export default function Testimonials({ index = "11" }: { index?: string }) {
           <button type="button" aria-label="Next testimonial" onClick={() => setI((i + 1) % n)} className={btn}><ArrowRight size={16} /></button>
           <span className="num ml-3 text-sm">{i + 1} / {n}</span>
         </div>
-        <p className="mt-8 text-xs text-espresso/70">{TESTIMONIAL_NOTE}</p>
+        {TESTIMONIALS.some((x) => x.isMock) && <p className="mt-8 text-xs text-espresso/80">Illustrative testimonials — not verified client feedback.</p>}
       </div>
     </section>
   );

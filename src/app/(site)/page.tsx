@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+import { getContent } from "@/content";
+import { buildMetadata } from "@/lib/seo";
+import { getBrand } from "@/lib/site";
 import HeroSection from "@/components/home/HeroSection";
 import StudioIntro from "@/components/home/StudioIntro";
 import FeaturedProjects from "@/components/home/FeaturedProjects";
@@ -17,29 +19,32 @@ import ContactPreview from "@/components/home/ContactPreview";
 import LightStudy from "@/components/home/LightStudy";
 import Engagement from "@/components/home/Engagement";
 
-export const metadata: Metadata = {
-  title: { absolute: "Atelier Verre — Luxury Interior Architecture & Design" },
-  description: "An immersive 3D walk through Atelier Verre, a luxury interior design studio concept: spaces of stone, timber, bronze and light.",
-  alternates: { canonical: "/" },
-};
+export const metadata = buildMetadata({
+  title: `${getBrand().name} — Luxury Interior Architecture & Design`,
+  absoluteTitle: true,
+  description: `An immersive walk through ${getBrand().name}, a luxury interior design studio: spaces of stone, timber, bronze and light.`,
+  path: "/",
+});
 
-export default function Home() {
+export default async function Home() {
+  const content = getContent();
+  const [projects, categories, services, materials, studio] = await Promise.all([content.getProjects(), content.getCategories(), content.getServices(), content.getMaterials(), content.getStudio()]);
   return (
     <>
       <HeroSection />
       <StudioIntro index="01" />
-      <FeaturedProjects index="02" />
-      <ProjectCategories index="03" />
+      <FeaturedProjects index="02" projects={projects} categories={categories} />
+      <ProjectCategories index="03" projects={projects} categories={categories} />
       <SpatialExperience index="04" />
       <LightStudy index="05" />
-      <ServicesOverview index="06" />
-      <MaterialsShowcase index="07" />
-      <DesignPhilosophy index="08" />
-      <DesignProcess index="09" />
+      <ServicesOverview index="06" services={services} />
+      <MaterialsShowcase index="07" materials={materials} />
+      <DesignPhilosophy index="08" items={studio.philosophy} />
+      <DesignProcess index="09" stages={studio.process} />
       <Engagement index="10" />
-      <StudioStory index="11" />
+      <StudioStory index="11" values={studio.values} brandName={getBrand().name} />
       <TeamSection index="12" />
-      <Testimonials index="13" />
+      <Testimonials index="13" items={studio.testimonials} />
       <JournalPreview index="14" />
       <ConsultationCTA index="15" />
       <ContactPreview index="16" />

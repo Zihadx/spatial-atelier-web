@@ -3,13 +3,13 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { useRef } from "react";
 import { PROJECT_PHOTO } from "@/data/photos";
-import { CATEGORY_BY_ID } from "@/data/projects";
 import type { Project } from "@/types";
 import { cn } from "@/lib/utils";
 import Photo from "@/components/ui/Photo";
 
 interface Props {
   project: Project;
+  categoryLabel: string;
   index?: number;
   className?: string;
   priority?: boolean;
@@ -17,7 +17,7 @@ interface Props {
 }
 
 /** Uniform portfolio tile: fixed frame ratios only, pointer-driven depth on hover. */
-export default function ProjectCard({ project, index, className, priority, frame = "frame-portrait" }: Props) {
+export default function ProjectCard({ project, categoryLabel, index, className, priority, frame = "frame-portrait" }: Props) {
   const el = useRef<HTMLAnchorElement>(null);
   const move = (e: React.PointerEvent) => {
     const r = el.current?.getBoundingClientRect(); if (!r || !el.current) return;
@@ -37,7 +37,7 @@ export default function ProjectCard({ project, index, className, priority, frame
         {index !== undefined && <span className="num absolute bottom-3 right-4 text-2xl text-ivory/85">{String(index + 1).padStart(2, "0")}</span>}
       </div>
       <div className="mt-4">
-        <p className="eyebrow mb-1">{CATEGORY_BY_ID[project.category].label}</p>
+        <p className="eyebrow mb-1">{categoryLabel}</p>
         <h3 className="display-s transition-colors duration-500 group-hover:text-bronze">{project.title}</h3>
         <p className="mt-1.5 line-clamp-2 text-sm text-muted">{project.summary}</p>
       </div>

@@ -18,6 +18,8 @@ interface Props {
   /** capture mode used by the still-render route */
   still?: boolean;
   priority?: boolean;
+  /** `sizes` for the static fallback image: describe the scene's real rendered width. */
+  fallbackSizes?: string;
   shadows?: boolean;
   exposure?: number;
   ariaLabel?: string;
@@ -39,7 +41,7 @@ function ReadySignal({ onReady }: { onReady: () => void }) {
  */
 export default function SceneCanvas({
   children, fallback, alt, className, fov = 38, position = [0, 1.5, 9], still = false,
-  priority = false, shadows = true, exposure = 1, ariaLabel,
+  priority = false, fallbackSizes, shadows = true, exposure = 1, ariaLabel,
 }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
@@ -72,7 +74,7 @@ export default function SceneCanvas({
   return (
     <div ref={host} className={cn("relative h-full w-full overflow-hidden bg-espresso", className)} role="img" aria-label={ariaLabel ?? alt}>
       <div className={cn("absolute inset-0 transition-opacity duration-1000", ready ? "opacity-0" : "opacity-100")}>
-        <WebGLFallback src={fallback} alt={alt} priority={priority} />
+        <WebGLFallback src={fallback} alt={alt} priority={priority} sizes={fallbackSizes} />
       </div>
       {webgl && (live || still) && (
         <div className={cn("absolute inset-0 transition-opacity duration-1000", ready ? "opacity-100" : "opacity-0")}>

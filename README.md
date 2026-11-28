@@ -1,19 +1,63 @@
 # Atelier Verre — The Living Space
 
-An immersive, 3D-driven luxury interior design website (concept). Next.js 16 App Router · React 19 · TypeScript (strict) · Tailwind CSS 4 · Three.js / React Three Fiber / drei · GSAP + ScrollTrigger + SplitText · Motion · Lenis · React Hook Form + Zod.
+A luxury interior-design website with a scroll-scrubbed cinematic hero, a 3D design-process stage and interactive 3D rooms and materials. Next.js 16 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS 4 · Three.js / React Three Fiber · GSAP · Zod · Vitest · Playwright.
+
+## Quick start
+
+Requires **Node 22** (`.nvmrc`). Commands use npm because the committed lockfile is `package-lock.json`; if you prefer pnpm, run `pnpm install` locally but keep **one** lockfile in git.
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000
-npm run lint
-npm run typecheck
-npm run build && npm start
+cp .env.example .env.local     # optional in development, see "Environment"
+npm run dev                    # http://localhost:3000
 ```
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Development server (Turbopack). `NEXT_PUBLIC_SITE_URL` defaults to `http://localhost:3000`. |
+| `npm run check` | Type-check, lint and unit tests — run before every push. |
+| `npm test` / `npm run test:watch` | Vitest unit tests (`tests/unit`). |
+| `npm run test:e2e` | Playwright against a **production** build (`tests/e2e`). First run: `npx playwright install chromium`. |
+| `NEXT_PUBLIC_SITE_URL=https://your-domain npm run build && npm start` | Production build. **Fails if `NEXT_PUBLIC_SITE_URL` is missing or invalid.** |
+
+PowerShell: `$env:NEXT_PUBLIC_SITE_URL="https://your-domain"; npm run build`.
+
+## Environment
+
+All variables are validated in one place, `src/env.ts`; an invalid production environment fails `next build` / `next start` with a clear message. See `.env.example` for every variable.
+
+| Variable | Needed | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_SITE_URL` | production | Canonical origin (https). Drives canonical URLs, sitemap, Open Graph, structured data and the contact API's allowed origin. |
+| `RESEND_API_KEY`, `CONTACT_FROM_EMAIL` | to receive form mail | Server-side only. Without them the form still validates and the API answers `delivered:false`; the UI then points visitors to the studio email. |
+| `CONTACT_TO_EMAIL` | optional | Overrides the primary email in `contact.config.ts`. |
+| `TRUSTED_PROXY_HEADER`, `TRUSTED_PROXY_HOPS` | recommended behind a proxy | Enables per-IP rate limiting from a header **your** proxy controls (e.g. `x-forwarded-for` on Vercel). |
+| `ENABLE_RENDER_ROUTES` | tooling only | Exposes `/render/*` (needed only to run `npm run render:stills` against a production build). Always on in development. |
+
+## Where things live
+
+```
+src/config/     Typed, zod-validated site information (brand, contact, locations, navigation, SEO)
+src/lib/site.ts The only place components read that information from (plus lib/contact-links.ts helpers)
+src/content/    ContentSource interface + static adapter (projects, services, journal, studio, materials)
+src/server/     Contact service: origin/size checks, rate limiting, mail + lead-store adapters
+src/app/        Routes, metadata (lib/seo.ts), API route (thin wrapper over src/server)
+src/components/ UI; client components get data as props from server pages
+tests/          unit (Vitest) and e2e (Playwright)
+```
+
+Read **ARCHITECTURE.md** for the reasoning and **API_CONTRACTS.md** for the contact endpoint contract.
+
+### Changing site information (no component edits)
+Edit `src/config/*.config.ts`: brand name and wordmark, tagline, email, phones, WhatsApp, social links, locations and hours, navigation, SEO defaults. Everything that shows them (header, menu, footer, contact page, metadata, manifest, sitemap, structured data) updates. Phone numbers are stored in E.164 (`+8801304610108`) with a separate display string.
+
+### Mock data and the launch checklist
+Placeholder data is flagged `isMock` in config and content, and `getMockInventory()` (in `src/lib/site.ts`) lists what still needs replacing. Currently mock: the contact email and phone, both locations (Gulshan Studio, Dhanmondi Showroom — area-level only, no street address), the form's budget bands, FAQ answers, team roles and testimonials. Policy, enforced by tests: **mock contact details and locations are never emitted as structured data**, and invented people are never named or pictured. To go live, replace the values, set `isMock: false`, and fill `addressLines` / `geo`.
 
 ## What is in the site
 - **Home** — 16 numbered sections: scroll-scrubbed cinematic hero (image sequence on canvas), studio intro (counters + ticker), pinned horizontal project gallery, cursor-following category index, live 3D spatial experience, a draggable daylight-to-dusk light study (same camera, two renders), services with photo wipes, material library, scrubbed-text philosophy, a self-drawing architectural plan for the 7-stage process, three engagement models, studio story, team, testimonials, journal, consultation CTA, contact, photographic footer.
 - **/projects** (URL-driven category filters animated with GSAP Flip, plus a typographic Index view), **/projects/[slug]** (case study: specification sheet, numbered design moves, click-to-load 3D scene, full-bleed "next project"), **/services**, **/studio**, **/materials**, **/contact**, **/journal**, **/journal/[slug]**.
-- GSAP preloader, scroll-aware navbar with progress line, reading-progress bar on articles, `/privacy` and `/terms` templates.
+- GSAP preloader, scroll-aware navbar with progress line, reading-progress bar on articles, `/privacy` and `/terms` pages describing what the site actually does.
 - Sitemap, robots, per-route metadata and Open Graph, skip link, focus states, reduced-motion support, adaptive 3D quality, WebGL detection.
 
 ## Performance model (3D is used selectively)
@@ -51,23 +95,30 @@ The hero is a scroll-scrubbed camera move through a living room, rendered from a
 - Props: lit drum lamp shades, rugs with thickness, painted abstract wall art (canvas texture, disposed on unmount).
 - After changing textures or scenes, re-run: `node scripts/render-stills.mjs all`, `node scripts/derive-images.mjs`, `node scripts/generate-plates.mjs` (site running locally) so the pre-rendered posters and cards match.
 
-## Other honest notes
-- Local imagery is **3D renders** of this site's own scenes (`scripts/render-stills.mjs`, `scripts/derive-images.mjs`) and **generated texture studies** (`scripts/generate-textures.mjs`, `scripts/generate-plates.mjs`) — not photographs.
-- 3D models are Khronos glTF-Sample-Assets (CC-BY 4.0 — attribution required, see `ASSETS.md`).
-- Projects, team, testimonials, FAQ answers, address, phone and email are **placeholders / concept content** and labelled as such.
-- **The contact form is not connected to a backend** (validation + demo message only).
-- shadcn/ui and Redux Toolkit are not used (not needed); post-processing omitted for performance.
-- `/render/[id]` is a noindex helper route for the still-render script.
 
-## Structure
-`src/app` routes · `src/components/{layout,home,projects,services,materials,contact,ui,three}` · `src/data` content · `src/lib` animation, camera, WebGL helpers · `scripts` asset generators.
+## Testing
+
+- **Unit (`npm test`, ~73 tests):** env validation, config integrity (E.164, locations, wordmark), link/hours formatting, SEO and JSON-LD policy, content integrity and cross-references, the contact pipeline (origin, content-type, body size, rate limits incl. spoofed `X-Forwarded-For`, honeypot, mail failure, header-injection), and the frame-sequence engine (priority, bounded memory, failure handling).
+- **End-to-end (`npm run test:e2e`):** every page for one `h1`, per-page SEO tags, no console errors and **no CSP violations**; navigation; config reaching the UI; the contact form and API attack cases; security headers and immutable caching; `/render` gated; hero and process stage behaviour incl. reduced motion; the mobile project rail; axe WCAG 2 A/AA on every page at desktop and mobile sizes.
+- **CI:** `.github/workflows/ci.yml` runs types, lint, unit tests, `npm audit` (production deps, high+), a production build and the Playwright suite.
+- Environments that cannot download Playwright's browser can point `PW_CHROMIUM_PATH` at any compatible Chromium.
+
+## Security notes
+
+Implemented: Content-Security-Policy and standard headers (`next.config.ts`); same-origin + JSON-only + 16 KB-capped contact API; pruned in-memory rate limiter keyed on a trusted proxy IP and the submitting address; escaped JSON-LD; no secrets in client code; validated env. Limitations that depend on your infrastructure are listed in **ARCHITECTURE.md → Security**, notably: the rate limiter is per-instance, the CSP allows inline scripts (Next's bootstrap), and there is no durable lead store until you implement the `LeadStore` adapter.
+
+## Other honest notes
+- Local imagery is **3D renders** of this site's own scenes (`scripts/render-stills.mjs`, `scripts/derive-images.mjs`; run with `ENABLE_RENDER_ROUTES=true` against a production build) and **generated texture studies** (`scripts/generate-textures.mjs`, `scripts/generate-plates.mjs`) — not photographs.
+- 3D models are Khronos glTF-Sample-Assets (CC-BY 4.0 — attribution required, see `ASSETS.md`).
+- Projects are concept studies; project pages say so.
+- shadcn/ui and Redux Toolkit are not used (not needed); post-processing omitted for performance.
 
 ## Motion system
-GSAP owns scroll choreography (one ticker shared with Lenis); Motion handles interface transitions (menu, page enter, testimonials, filters). Shared easing: `expo.out` reveals, `power3.out` entrances. Everything is cleaned up through `useGSAP` scopes and reverted SplitText instances.
+GSAP owns scroll choreography (one ticker shared with Lenis); Motion handles interface transitions (menu, page enter, testimonials, filters). Shared easing: `expo.out` reveals, `power3.out` entrances. Scroll reveals use opacity only (never `visibility`) so content stays in the accessibility tree and Tab order. Everything is cleaned up through `useGSAP` scopes and reverted on unmount.
 
 ## Production checklist
-1. Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_SITE_URL`. To receive form submissions set `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` (Resend). Without them the forms say email delivery is not set up and point visitors to the studio email. `/api/contact` has a honeypot, validation and an in-memory rate limit (use a shared store such as Upstash for multi-instance deployments).
-2. Verify every photo in `src/data/photos.ts` (IDs are unverified) and replace placeholders: studio email/phone/address in `src/lib/constants.ts`, team, testimonials, FAQ, budget ranges, projects.
-3. Have counsel complete `/privacy` and `/terms`; add attribution for the CC-BY 3D models (`ASSETS.md`).
-4. Deploy (Vercel recommended): `npm run build`. Security headers and caching are set in `next.config.ts`; add a Content-Security-Policy once third-party sources are final.
-5. Run Lighthouse on the deployed URL and tune; test real devices for the pinned sections (home gallery, process).
+1. Set `NEXT_PUBLIC_SITE_URL`; for form delivery set `RESEND_API_KEY`, `CONTACT_FROM_EMAIL` (and `CONTACT_TO_EMAIL`); behind a proxy set `TRUSTED_PROXY_HEADER`.
+2. Replace mock data (see "Mock data and the launch checklist") and verify every photo in `src/data/photos.ts` (the Unsplash IDs are unverified).
+3. Have counsel review `/privacy` and `/terms` (they describe current behaviour and carry a "pending legal review" line); keep the CC-BY attribution (`ASSETS.md`).
+4. Decide on a durable lead store and a shared rate-limit store for multi-instance hosting (ARCHITECTURE.md).
+5. Run Lighthouse on the deployed URL and test the pinned sections (home gallery, process) on real mid-range phones.

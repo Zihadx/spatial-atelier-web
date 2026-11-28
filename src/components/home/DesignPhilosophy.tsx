@@ -4,20 +4,21 @@ import { useRef } from "react";
 import ImageReveal from "@/components/ui/ImageReveal";
 import SectionLabel from "@/components/ui/SectionLabel";
 import { PHOTO } from "@/data/photos";
-import { PHILOSOPHY } from "@/data/studio";
+import type { PhilosophyItem } from "@/content";
 import { gsap, prefersReducedMotion, registerGsap, SplitText } from "@/lib/animations";
 
 const STATEMENT = "A home should be quiet before it is impressive: designed from light and proportion, finished in materials that age with grace, and arranged so every object has an obvious place.";
 
 /** Scroll-scrubbed reading line (words light up as you read), then six principles in a strict two-column grid beside a sticky photograph. */
-export default function DesignPhilosophy({ index = "07" }: { index?: string }) {
+export default function DesignPhilosophy({ index = "07", items: PHILOSOPHY }: { index?: string; items: PhilosophyItem[] }) {
   const root = useRef<HTMLElement>(null);
   useGSAP(() => {
     registerGsap();
     if (prefersReducedMotion()) return;
-    const split = SplitText.create("[data-statement]", { type: "words" });
-    gsap.fromTo(split.words, { opacity: 0.16 }, { opacity: 1, stagger: 0.08, ease: "none", scrollTrigger: { trigger: "[data-statement]", start: "top 78%", end: "bottom 48%", scrub: true } });
-    gsap.from("[data-pr]", { y: 50, autoAlpha: 0, duration: 1, stagger: 0.1, ease: "power3.out", scrollTrigger: { trigger: "[data-grid]", start: "top 78%", once: true } });
+    const split = SplitText.create("[data-statement]", { type: "words", aria: "none" });
+    // colour sweep between two AA-contrast values (muted → espresso) instead of fading to 16% opacity, which fails WCAG contrast
+    gsap.fromTo(split.words, { color: "#5A554D" }, { color: "#332B24", stagger: 0.08, ease: "none", scrollTrigger: { trigger: "[data-statement]", start: "top 78%", end: "bottom 48%", scrub: true } });
+    gsap.from("[data-pr]", { y: 50, opacity: 0, duration: 1, stagger: 0.1, ease: "power3.out", scrollTrigger: { trigger: "[data-grid]", start: "top 78%", once: true } });
     gsap.utils.toArray<HTMLElement>("[data-line]").forEach((l) => gsap.from(l, { scaleX: 0, transformOrigin: "left", duration: 1.4, ease: "expo.out", scrollTrigger: { trigger: l, start: "top 90%", once: true } }));
     return () => split.revert();
   }, { scope: root });

@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { getContent, type MaterialInfo } from "@/content";
+import { buildMetadata } from "@/lib/seo";
+import { getSite } from "@/lib/site";
 import Photo from "@/components/ui/Photo";
 import { PROJECT_PHOTO } from "@/data/photos";
 import Link from "next/link";
@@ -11,30 +14,28 @@ import Button from "@/components/ui/Button";
 import ImageReveal from "@/components/ui/ImageReveal";
 import Reveal from "@/components/ui/Reveal";
 import RevealText from "@/components/ui/RevealText";
-import { MATERIAL_BY_ID } from "@/data/materials";
-import { CATEGORY_BY_ID, PROJECTS, PROJECT_BY_SLUG } from "@/data/projects";
-import { CONCEPT_NOTE } from "@/lib/constants";
 
 const LIGHT_LABEL = { natural: "Daylight-led", warm: "Warm, golden-hour", dusk: "Evening-led" } as const;
 const LAYOUT_LABEL = { gallery: "Gallery living", library: "Library lounge", suite: "Hotel suite", office: "Open workplace", pavilion: "Glass pavilion", dining: "Dining room", nocturne: "Evening living", court: "Courtyard living" } as const;
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() { return PROJECTS.map((p) => ({ slug: p.slug })); }
+export async function generateStaticParams() { return (await getContent().getProjects()).map((p) => ({ slug: p.slug })); }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const p = PROJECT_BY_SLUG[slug];
+  const p = await getContent().getProject(slug);
   if (!p) return {};
-  return {
-    title: p.title, description: p.summary, alternates: { canonical: `/projects/${p.slug}` },
-    openGraph: { title: p.title, description: p.summary, images: [{ url: p.images[0], width: 1920, height: 1200, alt: `${p.title} concept render` }] },
-  };
+  return buildMetadata({ title: p.title, description: p.summary, path: `/projects/${p.slug}`, image: { src: p.images[0], width: 1920, height: 1200, alt: `${p.title} concept render` } });
 }
 
 export default async function ProjectPage({ params }: Props) {
   const { slug } = await params;
-  const p = PROJECT_BY_SLUG[slug];
+  const content = getContent();
+  const [PROJECTS, categories, materials] = await Promise.all([content.getProjects(), content.getCategories(), content.getMaterials()]);
+  const CATEGORY_BY_ID = Object.fromEntries(categories.map((c) => [c.id, c]));
+  const MATERIAL_BY_ID = Object.fromEntries(materials.map((m) => [m.id, m])) as Record<MaterialInfo["id"], MaterialInfo>;
+  const p = PROJECTS.find((x) => x.slug === slug);
   if (!p) notFound();
   const i = PROJECTS.findIndex((x) => x.slug === slug);
   const prev = PROJECTS[(i + PROJECTS.length - 1) % PROJECTS.length];
@@ -64,7 +65,7 @@ export default async function ProjectPage({ params }: Props) {
             <Reveal><p className="eyebrow mb-6" id="overview">Design concept</p></Reveal>
             <RevealText as="p" className="display-m">{p.concept}</RevealText>
             <Reveal as="ol" stagger={0.12} className="mt-12">{p.details.map((d, n) => <li key={d} className="grid grid-cols-[3.5rem_1fr] items-baseline gap-4 border-t border-espresso/20 py-5"><span className="num text-3xl text-bronze">0{n + 1}</span><span className="display-s">{d}</span></li>)}</Reveal>
-            <p className="mt-10 text-xs text-muted">{CONCEPT_NOTE}</p>
+            <p className="mt-10 text-xs text-muted">{getSite().projectNote}</p>
           </div>
         </div>
       </section>
@@ -100,7 +101,7 @@ export default async function ProjectPage({ params }: Props) {
                 <li key={m} className={n % 2 ? "md:mt-12" : ""}>
                   <Link href="/materials" className="group block" data-cursor="Material">
                     <div className="frame frame-portrait"><div className="absolute inset-0 transition-transform duration-[1500ms] ease-[var(--ease-cine)] group-hover:scale-110"><Photo photo={{ src: info.plate, fallback: info.plate, alt: `${info.name} texture study` }} sizes="25vw" /></div></div>
-                    <p className="display-s mt-4">{info.name}</p><p className="text-sm text-espresso/70">{info.short}</p>
+                    <p className="display-s mt-4">{info.name}</p><p className="text-sm text-espresso/80">{info.short}</p>
                   </Link>
                 </li>
               );
@@ -123,7 +124,7 @@ export default async function ProjectPage({ params }: Props) {
       <section className="section surface-ink" aria-labelledby="related">
         <div className="container-x">
           <h2 id="related" className="display-m mb-16">Related <em>projects.</em></h2>
-          <div className="grid gap-12 md:grid-cols-2">{related.map((r, n) => <ProjectCard key={r.slug} project={r} index={n} frame="frame-landscape" />)}</div>
+          <div className="grid gap-12 md:grid-cols-2">{related.map((r, n) => <ProjectCard key={r.slug} project={r} categoryLabel={CATEGORY_BY_ID[r.category].label} index={n} frame="frame-landscape" />)}</div>
           <nav aria-label="Project navigation" className="mt-20 border-t border-ivory/20 pt-8"><Link href={`/projects/${prev.slug}`} className="link-u"><ArrowLeft size={14} aria-hidden /> Previous: {prev.title}</Link></nav>
         </div>
       </section>

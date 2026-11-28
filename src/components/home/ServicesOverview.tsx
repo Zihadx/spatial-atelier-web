@@ -6,12 +6,12 @@ import { ArrowRight } from "lucide-react";
 import Photo from "@/components/ui/Photo";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { SERVICE_PHOTO } from "@/data/photos";
-import { SERVICES } from "@/data/services";
+import type { Service } from "@/content";
 import { gsap, registerGsap } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 
 /** Sticky photograph that crossfades (clip-path wipe + scale) as the active service changes; list is the control. */
-export default function ServicesOverview({ index = "06" }: { index?: string }) {
+export default function ServicesOverview({ index = "06", services: SERVICES }: { index?: string; services: Service[] }) {
   const root = useRef<HTMLElement>(null);
   const [i, setI] = useState(0);
   const prev = useRef(0);

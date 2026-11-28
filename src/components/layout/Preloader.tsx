@@ -6,7 +6,7 @@ import { gsap, prefersReducedMotion, registerGsap } from "@/lib/animations";
 declare global { interface Window { __avReady?: boolean } }
 
 /** GSAP brand intro: letter-by-letter wordmark, a counting rule, then a curtain lift that releases the hero typography. Short on repeat visits. */
-export default function Preloader() {
+export default function Preloader({ brand }: { brand: { name: string; wordmark: { lead: string } } }) {
   const root = useRef<HTMLDivElement>(null);
   const [gone, setGone] = useState(false);
   useGSAP(() => {
@@ -27,11 +27,11 @@ export default function Preloader() {
       .to(root.current, { yPercent: -100, duration: 1.1, ease: "expo.inOut" }, 2.45);
   }, { scope: root });
   if (gone) return null;
-  const word = "Atelier Verre".split("");
+  const word = brand.name.split("");
   return (
     <div ref={root} data-preloader aria-hidden className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-espresso text-ivory">
       <p className="font-display text-5xl md:text-8xl" style={{ display: "flex" }}>
-        {word.map((c, i) => <span key={i} className="mask inline-block"><span data-pl className={`inline-block ${i >= 8 ? "italic text-bronze" : ""}`}>{c === " " ? "\u00A0" : c}</span></span>)}
+        {word.map((c, i) => <span key={i} className="mask inline-block"><span data-pl className={`inline-block ${i > brand.wordmark.lead.length ? "italic text-bronze" : ""}`}>{c === " " ? "\u00A0" : c}</span></span>)}
       </p>
       <div className="mt-10 flex w-64 items-center gap-4"><span className="relative block h-px flex-1 bg-ivory/20"><span data-bar className="absolute inset-0 origin-left scale-x-0 bg-bronze" /></span><span data-count className="num w-10 text-sm text-taupe">000</span></div>
     </div>

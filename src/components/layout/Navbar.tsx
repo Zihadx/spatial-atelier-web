@@ -5,10 +5,12 @@ import { useGSAP } from "@gsap/react";
 import { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion, registerGsap, ScrollTrigger } from "@/lib/animations";
 import { cn } from "@/lib/utils";
-import { NAV } from "@/data/navigation";
+import type { ChromeData } from "@/lib/chrome";
+import Wordmark from "@/components/ui/Wordmark";
 import MobileMenu from "./MobileMenu";
 
-export default function Navbar() {
+export default function Navbar({ brand, nav: NAV_DATA, contact }: { brand: ChromeData["brand"]; nav: ChromeData["nav"]; contact: ChromeData["contact"] }) {
+  const NAV = NAV_DATA.main;
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -38,8 +40,8 @@ export default function Navbar() {
         style={{ paddingTop: `calc(env(safe-area-inset-top, 0px) + ${scrolled ? "0.75rem" : "1.5rem"})` }}
       >
         <nav aria-label="Primary" className="container-x flex items-center justify-between">
-          <Link href="/" className="font-display text-[1.7rem] leading-none tracking-tight" aria-label="Atelier Verre — home">
-            Atelier <em className="text-bronze">Verre</em>
+          <Link href="/" className="font-display text-[1.7rem] leading-none tracking-tight" aria-label={`${brand.name} — home`}>
+            <Wordmark {...brand.wordmark} />
           </Link>
           <ul className="hidden items-center gap-9 lg:flex">
             {NAV.map((n) => {
@@ -61,7 +63,7 @@ export default function Navbar() {
         </nav>
         <span ref={bar} aria-hidden className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-bronze" />
       </header>
-      <MobileMenu open={open} onClose={() => setOpen(false)} />
+      <MobileMenu open={open} onClose={() => setOpen(false)} brand={brand} nav={NAV_DATA} contact={contact} />
     </>
   );
 }

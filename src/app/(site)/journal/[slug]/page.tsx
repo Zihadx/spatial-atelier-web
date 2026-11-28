@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
+import { getContent } from "@/content";
+import { buildMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageHero from "@/components/ui/PageHero";
 import ReadingProgress from "@/components/ui/ReadingProgress";
 import { JOURNAL_PHOTO } from "@/data/photos";
-import { JOURNAL } from "@/data/journal";
 
 type Props = { params: Promise<{ slug: string }> };
-export function generateStaticParams() { return JOURNAL.map((a) => ({ slug: a.slug })); }
+export async function generateStaticParams() { return (await getContent().getArticles()).map((a) => ({ slug: a.slug })); }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const a = JOURNAL.find((x) => x.slug === slug);
-  return a ? { title: a.title, description: a.excerpt, alternates: { canonical: `/journal/${a.slug}` } } : {};
+  const a = await getContent().getArticle(slug);
+  return a ? buildMetadata({ title: a.title, description: a.excerpt, path: `/journal/${a.slug}`, type: "article" }) : {};
 }
 
 export default async function Article({ params }: Props) {
   const { slug } = await params;
+  const JOURNAL = await getContent().getArticles();
   const a = JOURNAL.find((x) => x.slug === slug);
   if (!a) notFound();
   const more = JOURNAL.filter((x) => x.slug !== slug).slice(0, 3);

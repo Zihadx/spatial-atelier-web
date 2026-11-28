@@ -4,9 +4,6 @@ import sharp from "sharp";
 import path from "node:path";
 
 const SIZE = 1024;
-let seed = 1337;
-const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
-const reseed = (s) => { seed = s; };
 
 // tileable hashed value noise: lattice wraps at integer periods (px, py) so textures tile seamlessly
 function hashf(x, y, s) {
@@ -101,9 +98,9 @@ const defs = {
     const speck = sp > 0.9 ? -38 : sp < 0.08 ? 22 : 0;
     return [base[0] + speck, base[1] + speck, base[2] + speck, m * 0.6 + (sp - 0.5) * 0.15];
   }],
-  walnut: ["wood", (u, v) => grain(u, v, hex(0x3f2616), hex(0x82563a), 18, 0.5)],
+  walnut: ["wood", (u, v) => grain(u, v, hex(0x3f2616), hex(0x82563a), 18)],
   walnut_floor: ["wood", (u, v) => plankFloor(u, v, hex(0x3f2616), hex(0x8a5d3f), 16)],
-  oak: ["wood", (u, v) => grain(u, v, hex(0xb78f5c), hex(0xdcc197), 15, 0.35)],
+  oak: ["wood", (u, v) => grain(u, v, hex(0xb78f5c), hex(0xdcc197), 15)],
   oak_floor: ["wood", (u, v) => plankFloor(u, v, hex(0xb08a58), hex(0xe0c79d), 16)],
   bronze: ["metal", (u, v) => {
     const s = N(1, u, v, 2, 700) * 0.6 + N(2, u, v, 6, 300) * 0.4;
@@ -143,7 +140,7 @@ const defs = {
     const c = lerpC(hex(0xd8cab4), hex(0xece2d0), clamp(m * 0.9 + trowel * 0.15));
     return [c[0], c[1], c[2], m * 0.3 + trowel * 0.12];
   }],
-  glass: ["glass", (u, v) => {
+  glass: ["glass", (u) => {
     const flutes = 24;
     const f = (u * flutes) % 1;
     const prof = Math.sin(f * Math.PI);
@@ -152,7 +149,7 @@ const defs = {
   }],
 };
 
-function grain(u, v, dark, light, rings, knot) {
+function grain(u, v, dark, light, rings) {
   // planks: growth rings run along u (horizontal), gently wavering
   const w = fbm(nz, u, v, 2, 5, 4);
   const pos = v * rings + (w - 0.5) * 0.7 + (N(1, u, v, 2, 3) - 0.5) * 0.45;

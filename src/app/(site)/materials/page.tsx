@@ -1,22 +1,21 @@
-import type { Metadata } from "next";
+import { getContent, type MaterialInfo } from "@/content";
+import { buildMetadata } from "@/lib/seo";
 import Image from "next/image";
 import ConsultationCTA from "@/components/home/ConsultationCTA";
 import MaterialExplorer from "@/components/materials/MaterialExplorer";
 import PageHero from "@/components/ui/PageHero";
 import Reveal from "@/components/ui/Reveal";
-import { MATERIAL_BY_ID, MATERIAL_PAIRINGS } from "@/data/materials";
 
-export const metadata: Metadata = {
-  title: "Materials",
-  description: "An interactive library of travertine, marble, walnut, oak, bronze, boucle, linen, stone, plaster and reeded glass.",
-  alternates: { canonical: "/materials" },
-};
+export const metadata = buildMetadata({ title: "Materials", description: "An interactive library of travertine, marble, walnut, oak, bronze, boucle, linen, stone, plaster and reeded glass.", path: "/materials" });
 
-export default function MaterialsPage() {
+export default async function MaterialsPage() {
+  const content = getContent();
+  const [materials, MATERIAL_PAIRINGS] = await Promise.all([content.getMaterials(), content.getMaterialPairings()]);
+  const MATERIAL_BY_ID = Object.fromEntries(materials.map((m) => [m.id, m])) as Record<MaterialInfo["id"], MaterialInfo>;
   return (
     <>
       <PageHero eyebrow="Material library" title={<>Surfaces you can <em>feel.</em></>} lead="Ten materials as 3D samples and macro studies. Select one to rotate it under studio light." photo={{ src: "/images/materials/travertine.jpg", fallback: "/images/materials/travertine.jpg", alt: "Macro texture study of travertine" }} />
-      <MaterialExplorer />
+      <MaterialExplorer materials={materials} />
       <section className="section surface-sand" aria-labelledby="combos">
         <div className="container-x">
           <h2 id="combos" className="display-l mb-16">Material <em>combinations.</em></h2>
@@ -28,7 +27,7 @@ export default function MaterialsPage() {
               </Reveal>
             ))}
           </div>
-          <p className="mt-16 text-xs text-espresso/70">Textures and plates are procedurally generated studio studies, not photographs of real samples.</p>
+          <p className="mt-16 text-xs text-espresso/80">Textures and plates are procedurally generated studio studies, not photographs of real samples.</p>
         </div>
       </section>
       <ConsultationCTA index="→" />

@@ -9,6 +9,7 @@
 //  2. A motion-equalizing time curve: the footage eases in and out (about half of all visible change happens in a third
 //     of the frames). The manifest stores a cumulative curve so scroll position maps to *visible* progress, which keeps
 //     all seven stages feeling equally eventful instead of the first and last ones feeling frozen.
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
@@ -53,6 +54,7 @@ for (const [key, cfg] of Object.entries(sets)) {
   if (picks.at(-1) !== found.at(-1)) picks.push(found.at(-1));
   const h = Math.round(cfg.width * ratio);
   let bytes = 0, prev = null;
+  const hash = createHash("sha1");
   const weights = [0];
   for (let i = 0; i < picks.length; i++) {
     const { data, info } = await sharp(path.join(src, picks[i].f)).flatten({ background: "#E9DCCB" }).resize(cfg.width, h, { kernel: "lanczos3" }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
@@ -63,6 +65,7 @@ for (const [key, cfg] of Object.entries(sets)) {
     const out = path.join(dir, `f-${String(i + 1).padStart(4, "0")}.webp`);
     await sharp(data, { raw: { width: info.width, height: info.height, channels: info.channels } }).webp({ quality: cfg.quality, effort: 5 }).toFile(out);
     bytes += fs.statSync(out).size;
+    hash.update(fs.readFileSync(out));
   }
   // equalize visible change: compress the dynamic range of the per-frame motion, keep a floor so rests still advance
   const mean = weights.slice(1).reduce((a, b) => a + b, 0) / (weights.length - 1);
@@ -71,7 +74,7 @@ for (const [key, cfg] of Object.entries(sets)) {
   let acc = 0;
   const curve = eq.map((w) => { acc += w; return +(acc / total).toFixed(4); });
   curve[curve.length - 1] = 1;
-  manifest.sets[key] = { count: picks.length, width: cfg.width, height: h, pad: 4, dir: `/process/sequence/${key}`, bytes, curve };
+  manifest.sets[key] = { count: picks.length, width: cfg.width, height: h, pad: 4, dir: `/process/sequence/${key}`, bytes, version: hash.digest("hex").slice(0, 10), curve };
   console.log(`${key}: ${picks.length} frames, ${cfg.width}x${h}, ${(bytes / 1048576).toFixed(1)} MB`);
   if (key === "lg") {
     const at = (p) => curve.findIndex((c) => c >= p) + 1;

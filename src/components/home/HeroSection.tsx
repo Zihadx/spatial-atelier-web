@@ -3,10 +3,11 @@ import type { CSSProperties } from "react";
 import Button from "@/components/ui/Button";
 import RevealText from "@/components/ui/RevealText";
 import manifest from "@/data/hero-sequence.json";
+import { getBrand } from "@/lib/site";
 import { frameUrl, type SequenceSet } from "@/lib/image-sequence";
 import HeroMotion from "./hero/HeroMotion";
 
-const pick = (s: SequenceSet): SequenceSet => ({ count: s.count, width: s.width, height: s.height, pad: s.pad, dir: s.dir });
+const pick = (s: SequenceSet): SequenceSet => ({ count: s.count, width: s.width, height: s.height, pad: s.pad, dir: s.dir, version: s.version });
 const SETS = { lg: pick(manifest.sets.lg), sm: pick(manifest.sets.sm) };
 
 const POSTER_ALT =
@@ -18,6 +19,7 @@ const POSTER_ALT =
  * Static markup lives here (server); the canvas, scroll mapping and text choreography live in <HeroMotion />.
  */
 export default function HeroSection() {
+  const brand = getBrand();
   return (
     <section
       id="hero"
@@ -29,11 +31,11 @@ export default function HeroSection() {
       <div className="sticky top-0 h-svh overflow-hidden">
         <figure className="absolute inset-0 m-0">
           <Image
-            src={frameUrl(SETS.lg, 0)}
+            src={frameUrl(SETS.lg, 0, { versioned: false })}
             alt={POSTER_ALT}
             fill
             priority
-            quality={72}
+            quality={75}
             sizes="100vw"
             className="hero-poster object-cover"
           />
@@ -57,7 +59,7 @@ export default function HeroSection() {
         <div data-start className="pointer-events-none absolute inset-0 z-[2]">
           <div className="container-x flex h-full flex-col justify-between pb-[clamp(3rem,8svh,7rem)] pt-[clamp(6rem,15svh,8rem)] text-ivory md:pb-[clamp(2.5rem,7svh,5rem)]">
             <div className="md:ml-auto md:text-right">
-              <p data-hero-in className="eyebrow mb-5 !text-sandstone md:mb-6">Atelier Verre — The Art of Living</p>
+              <p data-hero-in className="eyebrow mb-5 !text-sandstone md:mb-6">{brand.name} — The Art of Living</p>
               <h1 id="hero-title" className="display-xl max-w-[11ch] !text-[clamp(2.9rem,5.8vw,6.4rem)] md:ml-auto md:!text-[clamp(3.4rem,5.8vw,6.4rem)] [&_em]:!text-sandstone">
                 <RevealText as="span" by="lines" waitForIntro className="block">Spaces That</RevealText>
                 <RevealText as="span" by="lines" waitForIntro delay={0.15} className="block"><em>Feel Like Home.</em></RevealText>
@@ -83,7 +85,7 @@ export default function HeroSection() {
 
         {/* closing state — the only place the calls to action return */}
         <div data-end className="pointer-events-none invisible absolute inset-0 z-[2] container-x flex flex-col justify-end pb-[clamp(3.5rem,9svh,7rem)] text-ivory md:items-end md:justify-start md:pb-0 md:pt-[15svh] md:text-right">
-          <p className="eyebrow mb-4 !text-sandstone">Atelier Verre</p>
+          <p className="eyebrow mb-4 !text-sandstone">{brand.name}</p>
           <p className="display-m max-w-[14ch] !text-[clamp(2rem,3.6vw,4rem)] md:max-w-[18ch] [&_em]:!text-sandstone">Every room, <em>composed with care.</em></p>
           <div className="pointer-events-auto mt-6 flex flex-wrap gap-3 md:justify-end md:gap-4">
             <Button href="/projects">Explore Our Work</Button>
@@ -95,7 +97,7 @@ export default function HeroSection() {
         <div data-hero-in className="pointer-events-none absolute bottom-[clamp(7rem,19svh,11rem)] right-[var(--gutter)] z-[2] hidden flex-col items-center gap-4 text-ivory group-data-[seq=error]/hero:hidden group-data-[seq=static]/hero:hidden md:flex" aria-hidden>
           <span data-hint className="eyebrow !text-sandstone [writing-mode:vertical-rl]">
             <span className="group-data-[seq=loading]/hero:hidden">Scroll</span>
-            <span className="hidden animate-pulse group-data-[seq=loading]/hero:inline">Loading</span>
+            <span className="hidden group-data-[seq=loading]/hero:inline">Loading</span>
           </span>
           <span className="relative block h-24 w-px bg-ivory/25">
             <span className="absolute inset-0 origin-top bg-bronze [transform:scaleY(var(--hp))]" />

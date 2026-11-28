@@ -6,14 +6,14 @@ import Link from "next/link";
 import { LayoutGrid, List } from "lucide-react";
 import Photo from "@/components/ui/Photo";
 import { PROJECT_PHOTO } from "@/data/photos";
-import { CATEGORIES, PROJECTS } from "@/data/projects";
+import type { Category, Project } from "@/content";
 import { Flip, gsap, prefersReducedMotion, registerGsap } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 import type { CategoryId } from "@/types";
 import ProjectCard from "./ProjectCard";
 
 /** Filterable portfolio on an equal 3-column grid. Filtering uses GSAP Flip so surviving cards glide to their new cells. */
-export default function ProjectGallery() {
+export default function ProjectGallery({ projects: PROJECTS, categories: CATEGORIES }: { projects: Project[]; categories: Category[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -70,7 +70,7 @@ export default function ProjectGallery() {
         {view === "grid" ? (
           <ul data-view className="grid gap-x-6 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
             {PROJECTS.map((p, i) => (
-              <li key={p.slug} data-card style={{ display: visible(p.category) ? undefined : "none" }}><ProjectCard project={p} index={i} priority={i < 3} /></li>
+              <li key={p.slug} data-card style={{ display: visible(p.category) ? undefined : "none" }}><ProjectCard project={p} categoryLabel={CATEGORIES.find((c) => c.id === p.category)?.label ?? ""} index={i} priority={i < 3} /></li>
             ))}
           </ul>
         ) : (

@@ -3,13 +3,11 @@ import { useGSAP } from "@gsap/react";
 import { useRef, useState } from "react";
 import { gsap, prefersReducedMotion, registerGsap } from "@/lib/animations";
 import { getLenis } from "@/lib/lenis";
-import { PROCESS } from "@/data/studio";
+import type { ProcessStage as Stage } from "@/content";
 import type { SequenceStatus } from "@/lib/image-sequence";
 import SectionLabel from "@/components/ui/SectionLabel";
 import ProcessStage from "@/components/home/process/ProcessStage";
 import { cn } from "@/lib/utils";
-
-const N = PROCESS.length;
 
 /** What the 3D model is actually showing during each stage (matched to the footage). */
 const STAGE_NOTES = [
@@ -27,7 +25,8 @@ const STAGE_NOTES = [
  * lit and landscaped. One scrubbed timeline drives the canvas (via a progress ref — no React state per frame), the
  * brief-reference inset and the finished-home callouts; React state only changes when the stage number does.
  */
-export default function DesignProcess({ index = "08" }: { index?: string }) {
+export default function DesignProcess({ index = "08", stages: PROCESS }: { index?: string; stages: Stage[] }) {
+  const N = PROCESS.length;
   const root = useRef<HTMLElement>(null);
   const [stage, setStage] = useState(0);
   const last = useRef(0);
@@ -87,7 +86,7 @@ export default function DesignProcess({ index = "08" }: { index?: string }) {
               <figcaption className="mt-3 sm:mt-4">
                 <span className="mb-1.5 flex items-center justify-between sm:mb-2">
                   <span className="eyebrow !text-bronze">Stage {p.n} — what the model shows</span>
-                  <span className="eyebrow hidden animate-pulse group-data-[seq=loading]/proc:inline" aria-hidden>Loading model</span>
+                  <span className="eyebrow hidden !text-sandstone group-data-[seq=loading]/proc:inline" aria-hidden>Loading model</span>
                 </span>
                 <span data-pnote className="block min-h-[3.9rem] text-sm text-sandstone sm:min-h-[2.6rem]">{STAGE_NOTES[stage]}</span>
               </figcaption>
@@ -102,7 +101,7 @@ export default function DesignProcess({ index = "08" }: { index?: string }) {
               </div>
               <ol className="mt-5 flex flex-wrap gap-2 sm:mt-7" aria-label="Process stages">
                 {PROCESS.map((x, i) => (
-                  <li key={x.n}><button type="button" onClick={() => jump(i)} aria-label={`Stage ${x.n}: ${x.t}`} aria-current={i === stage ? "step" : undefined} className={cn("h-10 w-10 rounded-full border text-xs font-semibold transition-colors duration-500", i === stage ? "border-bronze bg-bronze text-warm-white" : "border-ivory/30 hover:border-bronze")}>{x.n}</button></li>
+                  <li key={x.n}><button type="button" onClick={() => jump(i)} aria-label={`Stage ${x.n}: ${x.t}`} aria-current={i === stage ? "step" : undefined} className={cn("h-10 w-10 rounded-full border text-xs font-semibold transition-colors duration-500", i === stage ? "border-bronze bg-bronze text-charcoal" : "border-ivory/30 hover:border-bronze")}>{x.n}</button></li>
                 ))}
               </ol>
             </div>

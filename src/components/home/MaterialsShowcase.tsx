@@ -5,12 +5,13 @@ import { MaterialCanvas } from "@/components/three/scenes";
 import Button from "@/components/ui/Button";
 import Reveal from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { MATERIALS, MATERIAL_BY_ID } from "@/data/materials";
+import type { MaterialInfo } from "@/content";
 import { cn } from "@/lib/utils";
 import type { MaterialId } from "@/types";
 
-export default function MaterialsShowcase({ index = "07" }: { index?: string }) {
+export default function MaterialsShowcase({ index = "07", materials: MATERIALS }: { index?: string; materials: MaterialInfo[] }) {
   const [id, setId] = useState<MaterialId>("travertine");
+  const MATERIAL_BY_ID = Object.fromEntries(MATERIALS.map((x) => [x.id, x])) as Record<MaterialId, MaterialInfo>;
   const m = MATERIAL_BY_ID[id];
   return (
     <section className="surface-ink" aria-labelledby="mat-title">

@@ -2,12 +2,13 @@
 import Image from "next/image";
 import { useState } from "react";
 import { MaterialCanvas } from "@/components/three/scenes";
-import { MATERIALS, MATERIAL_BY_ID } from "@/data/materials";
+import type { MaterialInfo } from "@/content";
 import { cn } from "@/lib/utils";
 import type { MaterialId } from "@/types";
 
-export default function MaterialExplorer() {
+export default function MaterialExplorer({ materials: MATERIALS }: { materials: MaterialInfo[] }) {
   const [id, setId] = useState<MaterialId>("travertine");
+  const MATERIAL_BY_ID = Object.fromEntries(MATERIALS.map((x) => [x.id, x])) as Record<MaterialId, MaterialInfo>;
   const m = MATERIAL_BY_ID[id];
   return (
     <section className="section surface-ink" aria-label="Material library">

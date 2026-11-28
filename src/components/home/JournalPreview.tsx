@@ -3,11 +3,12 @@ import Button from "@/components/ui/Button";
 import Photo from "@/components/ui/Photo";
 import Reveal from "@/components/ui/Reveal";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { JOURNAL } from "@/data/journal";
+import { getContent } from "@/content";
 import { JOURNAL_PHOTO } from "@/data/photos";
 
 /** Three equal editorial tiles — same frame ratio, same type scale, so the row reads as one system. */
-export default function JournalPreview({ index = "12" }: { index?: string }) {
+export default async function JournalPreview({ index = "12" }: { index?: string }) {
+  const JOURNAL = await getContent().getArticles();
   return (
     <section className="surface-warm" aria-labelledby="journal-title">
       <div className="container-x section">

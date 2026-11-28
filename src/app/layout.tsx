@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { SITE } from "@/lib/constants";
+import { buildSiteJsonLd, serializeJsonLd } from "@/lib/seo";
+import { getBrand, getSite, getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const instrument = localFont({
@@ -13,25 +14,27 @@ const instrument = localFont({
 });
 const manrope = localFont({ src: "../fonts/Manrope.ttf", variable: "--font-manrope", weight: "200 800", display: "swap" });
 
+const brand = getBrand();
+const site = getSite();
+const ogImage = site.seo.defaultOgImage;
+
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE.url),
-  title: { default: `${SITE.name} — ${SITE.tagline}`, template: `%s — ${SITE.name}` },
-  description: SITE.description,
-  applicationName: SITE.name,
-  openGraph: {
-    type: "website", siteName: SITE.name, title: `${SITE.name} — ${SITE.tagline}`, description: SITE.description,
-    images: [{ url: "/images/hero/living-room.jpg", width: 1600, height: 1000, alt: "A 3D-rendered luxury living room with travertine, walnut and a curved boucle sofa" }],
-  },
+  metadataBase: new URL(getSiteUrl()),
+  title: { default: `${brand.name} — ${brand.tagline}`, template: site.seo.titleTemplate },
+  description: brand.description,
+  applicationName: brand.name,
+  openGraph: { type: "website", siteName: brand.name, locale: site.locale, title: `${brand.name} — ${brand.tagline}`, description: brand.description, images: [{ url: ogImage.src, width: ogImage.width, height: ogImage.height, alt: ogImage.alt }] },
   twitter: { card: "summary_large_image" },
 };
 
-export const viewport: Viewport = { viewportFit: "cover", themeColor: "#332B24", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { viewportFit: "cover", themeColor: brand.themeColor, width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${instrument.variable} ${manrope.variable}`}>
-      <body>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@graph": [{ "@type": "Organization", name: SITE.name, url: SITE.url, description: SITE.description, logo: `${SITE.url}/icon.svg` }, { "@type": "WebSite", name: SITE.name, url: SITE.url }] }) }} />
+    <html lang={site.language} className={`${instrument.variable} ${manrope.variable}`}>
+      {/* suppressHydrationWarning: browser extensions (Grammarly, password managers…) inject attributes on <body> before React hydrates */}
+      <body suppressHydrationWarning>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(buildSiteJsonLd()) }} />
         <noscript><style>{`[data-reveal],[data-split]{opacity:1!important}`}</style></noscript>
         {children}
       </body>

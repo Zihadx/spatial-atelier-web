@@ -1,13 +1,4 @@
-export interface Service {
-  id: string;
-  n: string;
-  title: string;
-  lead: string;
-  body: string;
-  scope: string[];
-  stage: "residence" | "villa" | "commercial" | "plan" | "styling" | "materials" | "renovation";
-  layout: "wide" | "tall" | "offset";
-}
+import type { FaqItem, MethodStep, Service } from "../types";
 
 export const SERVICES: Service[] = [
   { id: "residential", n: "01", title: "Residential Interior Design", stage: "residence", layout: "wide",
@@ -40,17 +31,18 @@ export const SERVICES: Service[] = [
     scope: ["Site visit", "Written report", "Phased roadmap"] },
 ];
 
-export const METHOD = [
+export const METHOD: MethodStep[] = [
   { t: "Listen first", d: "Every project begins with how the space is lived in, not how it looks." },
   { t: "Plan before surface", d: "Proportion, circulation and light are settled before materials are chosen." },
   { t: "Test in real light", d: "Samples and 3D previews are reviewed in the light of the actual room." },
   { t: "Detail with restraint", d: "Fewer, better decisions, carried through every junction and edge." },
 ];
 
-export const FAQ = [
-  { q: "How does a project begin?", a: "With a consultation about the space, the household or brand, and the budget. This demonstration site uses placeholder answers; replace them with the studio's real policy." },
-  { q: "Do you work remotely?", a: "Placeholder: describe the studio's real remote-working and site-visit policy here." },
-  { q: "How is pricing structured?", a: "Placeholder: describe fixed-fee, percentage or hourly options here." },
-  { q: "Can you work with existing furniture?", a: "Placeholder: explain how existing pieces are assessed and integrated into a scheme." },
-  { q: "What is included in a 3D preview?", a: "The site's 3D scenes illustrate the idea: a walkable preview of layout, light and materials before work begins." },
+/** Marked isMock: generic placeholder answers — replace with the studio's real policies before launch. */
+export const FAQ: FaqItem[] = [
+  { q: "How does a project begin?", a: "With a consultation about the space, the household or brand, and the budget. We then write a short brief that every later decision is checked against.", isMock: true },
+  { q: "Do you work remotely?", a: "Yes. Concept, planning and material reviews can be done remotely with 3D previews; site visits are scheduled where the project needs them.", isMock: true },
+  { q: "How is pricing structured?", a: "After the first consultation we propose a fee for each stage, so you know what you are committing to before the work begins.", isMock: true },
+  { q: "Can you work with existing furniture?", a: "Yes. We assess what you own for quality and fit, and integrate the best pieces into the scheme.", isMock: true },
+  { q: "What is included in a 3D preview?", a: "A walkable preview of layout, light and materials, so you can judge the space before work begins.", isMock: true },
 ];

@@ -1,21 +1,8 @@
 "use client";
-import type { MutableRefObject } from "react";
-import { PROJECT_BY_SLUG } from "@/data/projects";
 import type { LightMode, MaterialId } from "@/types";
-import LivingRoomScene from "./LivingRoomScene";
 import MaterialScene from "./MaterialScene";
 import SceneCanvas from "./SceneCanvas";
 import SpatialScene, { type Focus } from "./SpatialScene";
-
-const quiet = PROJECT_BY_SLUG["quiet-gallery"].preset;
-
-export function HeroCanvas({ progress }: { progress: MutableRefObject<number> }) {
-  return (
-    <SceneCanvas fallback="/images/hero/living-room.jpg" alt="3D living room with fluted travertine wall, curved boucle sofa and floor-to-ceiling glass" priority fov={38} position={[-4.6, 2.3, 10]} ariaLabel="Interactive 3D living room. Scroll to move through the space.">
-      <LivingRoomScene preset={quiet} hero progress={progress} lettering />
-    </SceneCanvas>
-  );
-}
 
 export function SpatialCanvas({ light, wall, floor, focus }: { light: LightMode; wall: MaterialId; floor: MaterialId; focus: Focus }) {
   return (

@@ -4,13 +4,13 @@
   --color-ivory: #F5F1E9;
   --color-warm-white: #FAF8F4;
   --color-sandstone: #D9CBB8;
-  --color-taupe: #A99B88;
+  --color-taupe: var(--taupe);
   --color-walnut: #60432F;
   --color-espresso: #332B24;
   --color-charcoal: #242421;
-  --color-bronze: #A88C67;
+  --color-bronze: var(--bronze);
   --color-sage: #AAB7A1;
-  --color-muted: #777168;
+  --color-muted: var(--muted-text);
   --font-display: var(--font-instrument), "Cormorant Garamond", Georgia, serif;
   --font-sans: var(--font-manrope), system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -23,9 +23,9 @@
   --walnut: #60432F;
   --espresso: #332B24;
   --charcoal: #242421;
-  --bronze: #A88C67;
+  --bronze: #AB8F6A; /* >=4.5:1 on espresso/charcoal; light surfaces use the darker ink variants below */
   --sage: #AAB7A1;
-  --muted-text: #777168;
+  --muted-text: #5A554D; /* AA (>=4.5:1) on ivory, warm-white and sandstone */
   --gutter: clamp(1.25rem, 4vw, 4.5rem);
   --ease-cine: cubic-bezier(0.16, 1, 0.3, 1);
   --nav-h: 5.25rem;
@@ -81,6 +81,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .surface-ink { background: var(--charcoal); color: var(--ivory); }
 .surface-ink .eyebrow { color: var(--taupe); }
 .surface-sand { background: var(--sandstone); color: var(--espresso); }
+/* Light surfaces use darker "ink" accents so accent text meets WCAG AA (4.5:1); dark surfaces keep the bright tokens above. */
+.surface-warm, .surface-light { --bronze: #6B5942; --taupe: #6B6154; }
+.surface-sand { --bronze: #5F4E39; --taupe: #5F574B; }
 .surface-warm { background: var(--warm-white); }
 .muted { color: var(--muted-text); }
 .surface-dark .muted, .surface-ink .muted { color: var(--taupe); }
